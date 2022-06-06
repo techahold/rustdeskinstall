@@ -7,6 +7,7 @@ uname=$(whoami)
 # Setup prereqs for server
 if [[ `which yum` ]]; then
    sudo yum install unzip -y
+   sudo yum install bind-utils -y
 elif [[ `which apt` ]]; then
    sudo apt-get update
    sudo apt-get install unzip -y
