@@ -4,15 +4,16 @@ Easy install Script for Rustdesk on linux, should work on any debian based serve
 # How to Install the server
 Please setup your firewall on your server prior to running the script.
 
-If you have UFW installed do the following commands:
+Make sure you have got access via ssh or otherwise setup prior setting up the firewall, command for UFW is.
+```
+ufw allow proto tcp from YOURIP to any port 22
+```
+
+If you have UFW installed use the following commands:
 ```
 ufw allow 21115:21119/tcp
 ufw allow 21116/udp
 sudo ufw enable
-```
-Make sure you have got access via ssh or otherwise setup prior to running the above, command for UFW is.
-```
-ufw allow proto tcp from YOURIP to any port 22
 ```
 
 Run the following commands:
