@@ -5,8 +5,19 @@ uname=$(whoami)
 
 
 # Setup prereqs for server
-sudo apt update
-sudo apt install unzip -y
+if [[ `which yum` ]]; then
+   sudo yum -y unzip
+elif [[ `which apt` ]]; then
+   sudo apt-get -y update
+   sudo apt-get -y unzip
+elif [[ `which pacman` ]]; then
+   sudo pacman -S unzip
+elif [[ `which zypper` ]]; then
+   sudo zypper install unzip
+else
+   echo "Unknown Platform, the install might fail"
+fi
+
 
 #Set firewall
 ufw allow 21115:21119/tcp
@@ -93,13 +104,9 @@ key=$(cat ${pubname})
 sudo rm ${TMPFILE}
 
 
-printf "Your IP is ${wanip}\n"
-printf "\n"
-printf "Your public key is ${key}\n"
-printf "\n"
-printf "Install Rustdesk on your machines and change your public key and IP/DNS name to the above\n"
-printf"\n"
-
+echo -e "Your IP is ${wanip}"
+echo -e "Your public key is ${key}"
+echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
 
 
 echo "Press any key to finish install"
