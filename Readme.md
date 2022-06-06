@@ -1,5 +1,5 @@
 # Rustdesk server Install Script
-Easy install Script for Rustdesk on linux, should work on any debian based server supporting systemd. For Rustdesk - rustdesk.com
+Easy install Script for Rustdesk on linux, should work on any debian based server supporting systemd. For Rustdesk - https://rustdesk.com
 
 # How to Install the server
 Make sure you have got access via ssh or otherwise setup prior to running this script (or press n on the firewall prompt) and switch to whatever user you want to run as.
