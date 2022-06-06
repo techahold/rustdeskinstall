@@ -5,8 +5,8 @@ uname=$(whoami)
 
 
 # Setup prereqs for server
-apt update
-apt install unzip -y
+sudo apt update
+sudo apt install unzip -y
 
 #Set firewall
 ufw allow 21115:21119/tcp
@@ -16,21 +16,23 @@ sudo ufw enable
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
     echo "Creating /opt/rustdesk"
-    mkdir -p /opt/rustdesk/
+    sudo mkdir -p /opt/rustdesk/
 fi
+sudo chown ${uname} -R /opt/rustdesk
 cd /opt/rustdesk/
 
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-TMPFILE=`mktemp`
-wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip" -O ${TMPFILE}
+TMPFILE=$(mktemp)
+sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip" -O ${TMPFILE}
 unzip ${TMPFILE}
 
 # Make Folder /var/log/rustdesk/
 if [ ! -d "/var/log/rustdesk" ]; then
     echo "Creating /var/log/rustdesk"
-    mkdir -p /var/log/rustdesk/
+    sudo mkdir -p /var/log/rustdesk/
 fi
+sudo chown ${uname} -R /var/log/rustdesk/
 
 # Setup Systemd to launch hbbs
 rustdesksignal="$(cat << EOF
@@ -53,6 +55,7 @@ WantedBy=multi-user.target
 EOF
 )"
 echo "${rustdesksignal}" | sudo tee /etc/systemd/system/rustdesksignal.service > /dev/null
+sudo systemctl daemon-reload
 sudo systemctl enable rustdesksignal.service
 sudo systemctl start rustdesksignal.service
 
@@ -77,6 +80,7 @@ WantedBy=multi-user.target
 EOF
 )"
 echo "${rustdeskrelay}" | sudo tee /etc/systemd/system/rustdeskrelay.service > /dev/null
+sudo systemctl daemon-reload
 sudo systemctl enable rustdeskrelay.service
 sudo systemctl start rustdeskrelay.service
 
@@ -86,7 +90,7 @@ wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
 pubname=$(find /opt/rustdesk -name *.pub)
 key=$(cat ${pubname})
 
-rm ${TMPFILE}
+sudo rm ${TMPFILE}
 
 
 printf >&2 "Your IP is ${wanip}"
