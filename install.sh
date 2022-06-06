@@ -14,12 +14,6 @@ else
    echo "Unknown Platform, the install might fail"
 fi
 
-
-#Set firewall
-ufw allow 21115:21119/tcp
-ufw allow 21116/udp
-sudo ufw enable
-
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
     echo "Creating /opt/rustdesk"
