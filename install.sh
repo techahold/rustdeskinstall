@@ -93,12 +93,12 @@ key=$(cat ${pubname})
 sudo rm ${TMPFILE}
 
 
-printf >&2 "Your IP is ${wanip}"
-printf >&2 "\n\n"
-printf >&2 "Your public key is ${key}\n\n"
-printf >&2 "\n\n"
-printf >&2 "Install Rustdesk on your machines and change your public key and IP/DNS name to the above\n\n"
-printf >&2 "\n\n"
+printf "Your IP is ${wanip}\n"
+printf "\n"
+printf "Your public key is ${key}\n"
+printf "\n"
+printf "Install Rustdesk on your machines and change your public key and IP/DNS name to the above\n"
+printf"\n"
 
 
 
