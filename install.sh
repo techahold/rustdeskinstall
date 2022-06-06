@@ -11,6 +11,7 @@ if [[ `which yum` ]]; then
 elif [[ `which apt` ]]; then
    sudo apt-get update
    sudo apt-get install unzip -y
+   sudo apt-get install dnsutils -y
 else
    echo "Unknown Platform, the install might fail"
 fi
