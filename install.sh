@@ -6,10 +6,10 @@ uname=$(whoami)
 
 # Setup prereqs for server
 if [[ `which yum` ]]; then
-   sudo yum -y unzip
+   sudo yum install unzip
 elif [[ `which apt` ]]; then
    sudo apt-get -y update
-   sudo apt-get -y unzip
+   sudo apt-get -y install unzip
 else
    echo "Unknown Platform, the install might fail"
 fi
