@@ -5,10 +5,10 @@ uname=$(whoami)
 
 
 # Setup prereqs for server
-if [[ `which yum` ]]; then
+if [[ $(which yum) ]]; then
    sudo yum install unzip -y
    sudo yum install bind-utils -y
-elif [[ `which apt` ]]; then
+elif [[ $(which apt) ]]; then
    sudo apt-get update
    sudo apt-get install unzip -y
    sudo apt-get install dnsutils -y
@@ -21,21 +21,21 @@ if [ ! -d "/opt/rustdesk" ]; then
     echo "Creating /opt/rustdesk"
     sudo mkdir -p /opt/rustdesk/
 fi
-sudo chown ${uname} -R /opt/rustdesk
+sudo chown "${uname}" -R /opt/rustdesk
 cd /opt/rustdesk/
 
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 TMPFILE=$(mktemp)
-sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip" -O ${TMPFILE}
-unzip ${TMPFILE}
+sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip" -O "${TMPFILE}"
+unzip "${TMPFILE}"
 
 # Make Folder /var/log/rustdesk/
 if [ ! -d "/var/log/rustdesk" ]; then
     echo "Creating /var/log/rustdesk"
     sudo mkdir -p /var/log/rustdesk/
 fi
-sudo chown ${uname} -R /var/log/rustdesk/
+sudo chown "${uname}" -R /var/log/rustdesk/
 
 # Setup Systemd to launch hbbs
 rustdesksignal="$(cat << EOF
@@ -91,9 +91,9 @@ sudo systemctl start rustdeskrelay.service
 wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
 
 pubname=$(find /opt/rustdesk -name *.pub)
-key=$(cat ${pubname})
+key=$(cat "${pubname}")
 
-sudo rm ${TMPFILE}
+sudo rm "${TMPFILE}"
 
 
 echo -e "Your IP is ${wanip}"
