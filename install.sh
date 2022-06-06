@@ -10,10 +10,6 @@ if [[ `which yum` ]]; then
 elif [[ `which apt` ]]; then
    sudo apt-get -y update
    sudo apt-get -y unzip
-elif [[ `which pacman` ]]; then
-   sudo pacman -S unzip
-elif [[ `which zypper` ]]; then
-   sudo zypper install unzip
 else
    echo "Unknown Platform, the install might fail"
 fi
