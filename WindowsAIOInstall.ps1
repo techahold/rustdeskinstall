@@ -1,4 +1,4 @@
-# Replace ${wanip} and ${key} with the relevant info
+# Replace wanipreg and keyreg with the relevant info
 
 $ErrorActionPreference= 'silentlycontinue'
 
@@ -22,11 +22,11 @@ start .\rustdesk-1.1.9-putes.exe --silent-install
 If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '${wanip}' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '${wanip}'`nkey = '${key}'`nrelay-server = '${wanip}'`napi-server = 'https://${wanip}'"
+Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 }
 else {
 New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '${wanip}' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '${wanip}'`nkey = '${key}'`nrelay-server = '${wanip}'`napi-server = 'https://${wanip}'"
+Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 }
 
 Start-sleep -s 20
