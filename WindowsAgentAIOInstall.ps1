@@ -17,23 +17,6 @@ cd rustdesk
 start .\rustdesk-1.1.9-putes.exe --silent-install
 }
 
-# Set URL Handler
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "(Default)" -Value "URL:RustDesk Protocol"
-New-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "URL Protocol" -Type STRING
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" -Name "(Default)" -Value "RustDesk.exe,0"
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell" 
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open" 
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value '"\"C:\\Program Files\\RustDesk\\urlhandler.exe\" \"%1\""'
-New-Item "C:\Program Files\RustDesk\urlhandler.ps1"
-Set-Content "C:\Program Files\RustDesk\urlhandler.ps1" "`$url_handler = `$args[0`n`$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''`nStart-Process -NoNewWindow -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList '--connect `$rustdesk_id'"
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-Install-Module ps2exe -Force
-Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\urlhandler.exe"
-Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
-
 # Write config
 If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
