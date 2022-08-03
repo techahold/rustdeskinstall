@@ -87,6 +87,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable rustdeskrelay.service
 sudo systemctl start rustdeskrelay.service
 
+while ! [[ $CHECK_RUSTDESK_READY ]]; do
+  CHECK_RUSTDESK_READY=$(sudo systemctl status rustdeskrelay.service | grep "Active: active (running)")
+  echo -ne "Rustdesk Relay not ready yet...${NC}\n"
+  sleep 3
+done
+
 #Get WAN IP
 wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
 
