@@ -95,6 +95,10 @@ key=$(cat "${pubname}")
 
 sudo rm "${TMPFILE}"
 
+# Create windows install script 
+wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/main/WindowsAIOInstall.ps1
+sudo sed -i "s|wanipreg|${wanip}|g" WindowsAIOInstall.ps1
+sudo sed -i "s|keyreg|${key}|g" WindowsAIOInstall.ps1
 
 echo -e "Your IP is ${wanip}"
 echo -e "Your public key is ${key}"
