@@ -23,5 +23,5 @@ chmod +x install.sh
 ./install.sh
 ```
 
-# Rustdesk windows sample powershell script
-Use the supplied powershell script to install using gpo or whatever.
+# Rustdesk windows powershell install script
+Generates a powershell script for install grabbing WAN IP and Key currently in /opt/rustdesk but will be moved to a web url for easy deployment.
