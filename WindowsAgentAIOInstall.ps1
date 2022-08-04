@@ -26,12 +26,12 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" -Name "(Def
 New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell" 
 New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open" 
 New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value '"\"C:\\Program Files\\RustDesk\\urlhandler.exe\" \"%1\""'
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value '"C:\Program Files\RustDesk\RustDeskURLLauncher.exe" "%1"'
 New-Item "C:\Program Files\RustDesk\urlhandler.ps1"
-Set-Content "C:\Program Files\RustDesk\urlhandler.ps1" "`$url_handler = `$args[0`n`$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''`nStart-Process -NoNewWindow -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList '--connect `$rustdesk_id'"
+Set-Content "C:\Program Files\RustDesk\urlhandler.ps1" "`$url_handler = `$args[0]`n`$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''`nStart-Process -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList ""--connect `$rustdesk_id"""
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 Install-Module ps2exe -Force
-Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\urlhandler.exe"
+Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\RustDeskURLLauncher.exe"
 Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
 
 # Write config
