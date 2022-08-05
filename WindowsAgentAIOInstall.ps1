@@ -1,6 +1,5 @@
-# Replace wanipreg and keyreg with the relevant info
-
 $ErrorActionPreference= 'silentlycontinue'
+# Replace wanipreg and keyreg with the relevant info
 
 If (!(test-path "c:\temp")) {
     New-Item -ItemType Directory -Force -Path "c:\temp"
@@ -34,18 +33,14 @@ Install-Module ps2exe -Force
 Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\RustDeskURLLauncher.exe"
 Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
 
-# Write config
-If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
+Start-sleep -s 20
+
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
-}
-else {
+Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '167.235.71.63' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '167.235.71.63'`nkey = 'gHavRSQfcAoBRzSNjVJX275yWR7I1vQpoxX1939mBCk='`nrelay-server = '167.235.71.63'`napi-server = 'https://167.235.71.63'"
 New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
-}
+Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '167.235.71.63' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '167.235.71.63'`nkey = 'gHavRSQfcAoBRzSNjVJX275yWR7I1vQpoxX1939mBCk='`nrelay-server = '167.235.71.63'`napi-server = 'https://167.235.71.63'"
 
-Start-sleep -s 20
 
 # Get RustDesk ID
 
