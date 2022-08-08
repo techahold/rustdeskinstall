@@ -1,5 +1,4 @@
 $ErrorActionPreference= 'silentlycontinue'
-
 # Replace wanipreg and keyreg with the relevant info
 
 If (!(test-path "c:\temp")) {
