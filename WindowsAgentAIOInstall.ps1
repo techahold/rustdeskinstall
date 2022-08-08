@@ -1,4 +1,5 @@
 $ErrorActionPreference= 'silentlycontinue'
+
 # Replace wanipreg and keyreg with the relevant info
 
 If (!(test-path "c:\temp")) {
@@ -35,18 +36,18 @@ Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
 Start-sleep -s 20
 }
 
-# Set Config for private server
+# Write config
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
 Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
 Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 
-#Set RD Password
 $rdpass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
 start "C:\Program Files\RustDesk\RustDesk.exe" "--password $rdpass"
 
 # Get RustDesk ID
+
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 $rustid=(Get-content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
@@ -59,6 +60,7 @@ Write-output "$rustpword"
 
 $rustid=(Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
+
 $rustpword = (Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
 $rustpword = $rustpword.Split("'")[1]
 Write-output "Config file found in windows service folder"
