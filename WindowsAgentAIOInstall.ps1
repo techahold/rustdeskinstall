@@ -14,7 +14,6 @@ Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/1.1.9/r
 expand-archive rustdesk.zip
 cd rustdesk
 start .\rustdesk-1.1.9-putes.exe --silent-install
-}
 
 # Set URL Handler
 New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" 
@@ -34,17 +33,20 @@ Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustD
 Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
 
 Start-sleep -s 20
+}
 
+# Set Config for private server
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '167.235.71.63' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '167.235.71.63'`nkey = 'gHavRSQfcAoBRzSNjVJX275yWR7I1vQpoxX1939mBCk='`nrelay-server = '167.235.71.63'`napi-server = 'https://167.235.71.63'"
+Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = '167.235.71.63' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = '167.235.71.63'`nkey = 'gHavRSQfcAoBRzSNjVJX275yWR7I1vQpoxX1939mBCk='`nrelay-server = '167.235.71.63'`napi-server = 'https://167.235.71.63'"
+Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
 
+#Set RD Password
+$rdpass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
+start "C:\Program Files\RustDesk\RustDesk.exe" "--password $rdpass"
 
 # Get RustDesk ID
-
-If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 $rustid=(Get-content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
@@ -54,19 +56,16 @@ $rustpword = $rustpword.Split("'")[1]
 Write-output "Config file found in user folder"
 Write-output "$rustid"
 Write-output "$rustpword"
-}
-else {
+
 $rustid=(Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
-
 $rustpword = (Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
 $rustpword = $rustpword.Split("'")[1]
 Write-output "Config file found in windows service folder"
 Write-output "$rustid"
 Write-output "$rustpword"
-}
 
 Start-sleep -s 10
 
-net stop rustdesk
+taskkill /IM "rustdesk.exe" /F
 net start rustdesk
