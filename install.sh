@@ -114,12 +114,14 @@ sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
 
 # Download and install gohttpserver
 mkdir /opt/gohttp
-cd /opt/gohttp
-wget https://github.com/codeskyblue/gohttpserver/releases/download/1.1.4/gohttpserver_1.1.4_linux_amd64.tar.gz
-tar -xf gohttpserver_1.1.4_linux_amd64.tar.gz
 mkdir public
+sudo chown "${uname}" -R /opt/gohttp
+cd /opt/gohttp
+GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+wget https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+tar -xf gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
-# Copy Rustdesk isntall scripts to folder
+# Copy Rustdesk install scripts to folder
 mv /opt/rustdesk/WindowsAIOInstall.ps1 /opt/gohttp/public/
 mv /opt/rustdesk/linuxclientinstall.sh /opt/gohttp/public/
 
