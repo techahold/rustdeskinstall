@@ -106,6 +106,11 @@ wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/main/WindowsAI
 sudo sed -i "s|wanipreg|${wanip}|g" WindowsAIOInstall.ps1
 sudo sed -i "s|keyreg|${key}|g" WindowsAIOInstall.ps1
 
+# Create linux install script 
+wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
+sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
+sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
+
 echo -e "Your IP is ${wanip}"
 echo -e "Your public key is ${key}"
 echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
