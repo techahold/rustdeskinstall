@@ -1,14 +1,13 @@
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c8)
 
-# Setup prereqs for server
+# Install Rustdesk
 if [[ $(which yum) ]]; then
    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
    sudo yum localinstall ./rustdesk-1.1.9.rpm
 elif [[ $(which apt) ]]; then
    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
-   sudo dpkg -i rustdesk-1.1.9.deb
-   sudo apt --fix-broken install -y
+   sudo apt install -fy ./rustdesk-1.1.9.deb
 else
    echo "Unknown Platform, the install will fail"
    exit
@@ -51,7 +50,13 @@ echo "${rustdesktoml2b}" | sudo tee /root/.config/rustdesk/RustDesk2.toml > /dev
 
 chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml 
 
+
 systemctl restart rustdesk
 
-cat /home/${uname}/.config/rustdesk/RustDesk.toml
-sudo cat /root/.config/rustdesk/RustDesk.toml
+echo "ID & Password for Rustdesk $(uname} are:"
+grep -w id /home/${uname}/.config/rustdesk/RustDesk.toml
+grep -w password /home/${uname}/.config/rustdesk/RustDesk.toml
+
+echo "ID & Password for Rustdesk (root) are:"
+sudo grep -w id /root/.config/rustdesk/RustDesk.toml
+sudo grep -w password /root/.config/rustdesk/RustDesk.toml
