@@ -2,7 +2,7 @@ $ErrorActionPreference= 'silentlycontinue'
 # Replace wanipreg and keyreg with the relevant info
 
 If (!(test-path "c:\temp")) {
-    New-Item -ItemType Directory -Force -Path "c:\temp"
+    New-Item -ItemType Directory -Force -Path "c:\temp" > null
 }
 cd c:\temp
 
@@ -16,21 +16,21 @@ cd rustdesk
 start .\rustdesk-1.1.9-putes.exe --silent-install
 
 # Set URL Handler
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "(Default)" -Value "URL:RustDesk Protocol"
-New-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "URL Protocol" -Type STRING
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" -Name "(Default)" -Value "RustDesk.exe,0"
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell" 
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open" 
-New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" 
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value '"C:\Program Files\RustDesk\RustDeskURLLauncher.exe" "%1"'
-New-Item "C:\Program Files\RustDesk\urlhandler.ps1"
-Set-Content "C:\Program Files\RustDesk\urlhandler.ps1" "`$url_handler = `$args[0]`n`$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''`nStart-Process -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList ""--connect `$rustdesk_id"""
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-Install-Module ps2exe -Force
-Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\RustDeskURLLauncher.exe"
-Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1"
+New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" > null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "(Default)" -Value "URL:RustDesk Protocol" > null
+New-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "URL Protocol" -Type STRING > null
+New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" > null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" -Name "(Default)" -Value "RustDesk.exe,0" > null
+New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell" > null 
+New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open" > null 
+New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" > null 
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value '"C:\Program Files\RustDesk\RustDeskURLLauncher.exe" "%1"' > null
+New-Item "C:\Program Files\RustDesk\urlhandler.ps1" > null
+Set-Content "C:\Program Files\RustDesk\urlhandler.ps1" "`$url_handler = `$args[0]`n`$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''`nStart-Process -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList ""--connect `$rustdesk_id""" > null
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force  > null
+Install-Module ps2exe -Force  > null
+Invoke-ps2exe "C:\Program Files\RustDesk\urlhandler.ps1" "C:\Program Files\RustDesk\RustDeskURLLauncher.exe" > null
+Remove-Item "C:\Program Files\RustDesk\urlhandler.ps1" > null
 
 Start-sleep -s 20
 }
@@ -45,28 +45,33 @@ Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\con
 $rdpass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
 start "C:\Program Files\RustDesk\RustDesk.exe" "--password $rdpass"
 
+Start-sleep -s 5
+
 # Get RustDesk ID
 
+If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
 $username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
 $rustid=(Get-content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
 
 $rustpword = (Get-content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
 $rustpword = $rustpword.Split("'")[1]
-Write-output "Config file found in user folder"
 Write-output "$rustid"
 Write-output "$rustpword"
-
+Write-output "Config file found in user folder"
+}
+else {
 $rustid=(Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
 $rustid = $rustid.Split("'")[1]
 
 $rustpword = (Get-content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
 $rustpword = $rustpword.Split("'")[1]
-Write-output "Config file found in windows service folder"
 Write-output "$rustid"
 Write-output "$rustpword"
+Write-output "Config file found in windows service folder"
+}
 
 Start-sleep -s 10
 
-taskkill /IM "rustdesk.exe" /F
-net start rustdesk
+taskkill /IM "rustdesk.exe" /F > null
+net start rustdesk > null
