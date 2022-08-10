@@ -103,7 +103,7 @@ key=$(cat "${pubname}")
 sudo rm "${TMPFILE}"
 
 # Create windows install script 
-wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/main/WindowsAIOInstall.ps1
+wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
 sudo sed -i "s|wanipreg|${wanip}|g" WindowsAIOInstall.ps1
 sudo sed -i "s|keyreg|${key}|g" WindowsAIOInstall.ps1
 
@@ -114,7 +114,7 @@ sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
 
 # Download and install gohttpserver
 mkdir /opt/gohttp
-mkdir public
+mkdir /opt/gohttp/public
 sudo chown "${uname}" -R /opt/gohttp
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
