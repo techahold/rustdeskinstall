@@ -27,10 +27,12 @@ done
 if [[ $(which yum) ]]; then
    sudo yum install unzip -y
    sudo yum install bind-utils -y
+   sudo yum install tar -y
 elif [[ $(which apt) ]]; then
    sudo apt-get update
    sudo apt-get install unzip -y
    sudo apt-get install dnsutils -y
+   sudo apt-get install tar -y
 else
    echo "Unknown Platform, the install might fail"
 fi
