@@ -47,9 +47,8 @@ cd /opt/rustdesk/
 
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-TMPFILE=$(mktemp)
-sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip" -O "${TMPFILE}"
-unzip "${TMPFILE}"
+sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
+unzip rustdesk-server-linux-x64.zip
 
 # Make Folder /var/log/rustdesk/
 if [ ! -d "/var/log/rustdesk" ]; then
@@ -117,7 +116,7 @@ done
 pubname=$(find /opt/rustdesk -name *.pub)
 key=$(cat "${pubname}")
 
-sudo rm "${TMPFILE}"
+sudo rm rustdesk-server-linux-x64.zip
 
 # Create windows install script 
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
@@ -139,9 +138,8 @@ fi
 sudo chown "${uname}" -R /opt/gohttp
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-TMPFILE=$(mktemp)
-sudo wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz" -O "${TMPFILE}"
-tar -xf  "${TMPFILE}"
+sudo wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 # Copy Rustdesk install scripts to folder
 mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
@@ -154,7 +152,7 @@ if [ ! -d "/var/log/gohttp" ]; then
 fi
 sudo chown "${uname}" -R /var/log/gohttp/
 
-sudo rm "${TMPFILE}"
+sudo rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 # Setup Systemd to launch Go HTTP Server
 gohttpserver="$(cat << EOF
