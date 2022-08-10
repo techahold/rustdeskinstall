@@ -182,7 +182,7 @@ sudo systemctl enable gohttpserver.service
 sudo systemctl start gohttpserver.service
 
 
-echo -e "Your IP is ${wanip}"
+echo -e "Your IP/DNS Address is ${wanip}"
 echo -e "Your public key is ${key}"
 echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
 echo -e "You can access your install scripts for clients by going to http://${wanip}:8000"
