@@ -104,8 +104,8 @@ sudo rm "${TMPFILE}"
 
 # Create windows install script 
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
-sudo sed -i "s|wanipreg|${wanip}|g" WindowsAIOInstall.ps1
-sudo sed -i "s|keyreg|${key}|g" WindowsAIOInstall.ps1
+sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
+sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
 
 # Create linux install script 
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
@@ -122,7 +122,7 @@ wget https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATES
 tar -xf gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 # Copy Rustdesk install scripts to folder
-mv /opt/rustdesk/WindowsAIOInstall.ps1 /opt/gohttp/public/
+mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
 mv /opt/rustdesk/linuxclientinstall.sh /opt/gohttp/public/
 
 # Make gohttp log folders
