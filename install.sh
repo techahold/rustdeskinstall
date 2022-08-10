@@ -4,6 +4,26 @@
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)
 
+# Choice for DNS or IP
+PS3='Choose your preferred option, IP or DNS/Domain: '
+WAN=("IP" "DNS/Domain")
+select WANOPT in "${WAN[@]}"; do
+    case $WANOPT in
+        "IP")
+	   wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
+	   echo $wanip
+		break
+            ;;
+
+        "DNS/Domain")
+	    echo -ne "Enter your preferred domain/dns address ${NC}: "
+        read wanip
+		echo $wanip
+		break
+		;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
 
 # Setup prereqs for server
 if [[ $(which yum) ]]; then
@@ -93,9 +113,6 @@ while ! [[ $CHECK_RUSTDESK_READY ]]; do
   echo -ne "Rustdesk Relay not ready yet...${NC}\n"
   sleep 3
 done
-
-#Get WAN IP
-wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
 
 pubname=$(find /opt/rustdesk -name *.pub)
 key=$(cat "${pubname}")
