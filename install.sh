@@ -11,14 +11,12 @@ select WANOPT in "${WAN[@]}"; do
 case $WANOPT in
 "IP")
 wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
-echo $wanip
 break
 ;;
 
 "DNS/Domain")
 echo -ne "Enter your preferred domain/dns address ${NC}: "
 read wanip
-echo $wanip
 break
 ;;
 *) echo "invalid option $REPLY";;
