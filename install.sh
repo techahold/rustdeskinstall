@@ -112,11 +112,11 @@ if [ ! -d "/opt/rustdesk" ]; then
     sudo mkdir -p /opt/rustdesk/
 fi
 sudo chown "${uname}" -R /opt/rustdesk
-cd /opt/rustdesk/
+cd /opt/rustdesk/ || exit 1
 
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
 unzip rustdesk-server-linux-x64.zip
 
 # Make Folder /var/log/rustdesk/
@@ -207,7 +207,7 @@ fi
 sudo chown "${uname}" -R /opt/gohttp
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 # Copy Rustdesk install scripts to folder
@@ -221,7 +221,7 @@ if [ ! -d "/var/log/gohttp" ]; then
 fi
 sudo chown "${uname}" -R /var/log/gohttp/
 
-sudo rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+rm gohttpserver_"${GOHTTPLATEST}"_linux_amd64.tar.gz
 
 # Setup Systemd to launch Go HTTP Server
 gohttpserver="$(cat << EOF

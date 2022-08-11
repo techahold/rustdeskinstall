@@ -36,6 +36,7 @@ else
     # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
     OS=$(uname -s)
     VER=$(uname -r)
+fi
 
 # Install Rustdesk
 case ${OS,,} in
@@ -98,7 +99,7 @@ chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml
 
 systemctl restart rustdesk
 
-echo "ID & Password for Rustdesk $(uname} are:"
+echo "ID & Password for Rustdesk ${uname} are:"
 grep -w id /home/${uname}/.config/rustdesk/RustDesk.toml
 grep -w password /home/${uname}/.config/rustdesk/RustDesk.toml
 

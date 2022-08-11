@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get Username
-uname=$(whoami)
+uname=$(whoami) # not used btw .. yet
 
 sudo systemctl stop gohttpserver.service
 sudo systemctl stop rustdesksignal.service
@@ -68,7 +68,7 @@ cd /opt/rustdesk/
 rm hbbs
 rm hbbs
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
 unzip rustdesk-server-linux-x64.zip
 
 sudo systemctl start rustdesksignal.service
@@ -80,14 +80,14 @@ while ! [[ $CHECK_RUSTDESK_READY ]]; do
   sleep 3
 done
 
-sudo rm rustdesk-server-linux-x64.zip
+rm rustdesk-server-linux-x64.zip
 
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
-sudo rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 sudo systemctl start gohttpserver.service
 
