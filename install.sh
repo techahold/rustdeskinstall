@@ -17,25 +17,94 @@ break
 "DNS/Domain")
 echo -ne "Enter your preferred domain/dns address ${NC}: "
 read wanip
+#check wanip is valid domain
+if ! [[ $wanip =~ ^[a-zA-Z0-9]+([a-zA-Z0-9.-]*[a-zA-Z0-9]+)?$ ]]; then
+    echo -e "${RED}Invalid domain/dns address${NC}"
+    exit 1
+fi
 break
 ;;
 *) echo "invalid option $REPLY";;
 esac
 done
 
-# Setup prereqs for server
-if [[ $(which yum) ]]; then
-   sudo yum install unzip -y
-   sudo yum install bind-utils -y
-   sudo yum install tar -y
-elif [[ $(which apt) ]]; then
-   sudo apt-get update
-   sudo apt-get install unzip -y
-   sudo apt-get install dnsutils -y
-   sudo apt-get install tar -y
+# identify OS
+if [ -f /etc/os-release ]; then
+    # freedesktop.org and systemd
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+    IDLIKE=$ID_LIKE
+elif type lsb_release >/dev/null 2>&1; then
+    # linuxbase.org
+    OS=$(lsb_release -si)
+    VER=$(lsb_release -sr)
+elif [ -f /etc/lsb-release ]; then
+    # For some versions of Debian/Ubuntu without lsb_release command
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+elif [ -f /etc/debian_version ]; then
+    # Older Debian/Ubuntu/etc.
+    OS=Debian
+    VER=$(cat /etc/debian_version)
+elif [ -f /etc/SuSe-release ]; then
+    # Older SuSE/etc.
+    OS=SuSE
+    VER=$(cat /etc/SuSe-release)
+elif [ -f /etc/redhat-release ]; then
+    # Older Red Hat, CentOS, etc.
+    OS=RedHat
+    VER=$(cat /etc/redhat-release)
 else
-   echo "Unknown Platform, the install might fail"
+    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+    OS=$(uname -s)
+    VER=$(uname -r)
 fi
+
+# Setup prereqs for server
+# common named prereqs
+prereq="curl wget unzip tar"
+echo "Installing prerequisites"
+if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]; then
+    prereq+=" dnsutils"
+    apt-get update
+    apt-get install -y  "${prereq}" # git
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]; then
+    prereq+=" bind-utils"
+    yum update -y
+    yum install -y "${prereq}"   #  git
+else
+    echo "Unsupported OS"
+    # here you could ask the user for permission to try and install anyway
+    # if they say yes, then do the install
+    # if they say no, exit the script
+    exit 1
+fi
+
+# #/*
+# Alternatively since case is faster than if then else
+# case ${IDLIKE} in
+#     ubuntu|debian)
+#         # Debian/Ubuntu/etc.
+#         sudo apt-get update
+#         sudo apt-get install -y curl wget unzip dnsutils tar  #  git
+#         ;;
+#     centos|fedora|redhat) #|amazon)
+#         # CentOS/RedHat/Fedora/Amazon/etc.
+#         sudo yum update -y
+#         sudo yum install -y curl wget unzip bind-utils tar #  git
+#         ;;
+#     *)
+#         echo "Unsupported OS"
+#         echo "Unknown Platform, the install might fail"
+#         # here you could ask the user for permission to try and install anyway
+#         # if they say yes, then do the install
+#         # if they say no, exit the script
+#         exit 1
+#         ;;
+#     esac
+# */
 
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
@@ -116,14 +185,14 @@ done
 pubname=$(find /opt/rustdesk -name *.pub)
 key=$(cat "${pubname}")
 
-sudo rm rustdesk-server-linux-x64.zip
+rm rustdesk-server-linux-x64.zip
 
-# Create windows install script 
+# Create windows install script
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
 sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
 sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
 
-# Create linux install script 
+# Create linux install script
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
 sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
 sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh

@@ -8,16 +8,58 @@ sudo systemctl stop rustdesksignal.service
 sudo systemctl stop rustdeskrelay.service
 
 
-# Setup prereqs for server
-if [[ $(which yum) ]]; then
-   sudo yum install unzip -y
-   sudo yum install bind-utils -y
-elif [[ $(which apt) ]]; then
-   sudo apt-get update
-   sudo apt-get install unzip -y
-   sudo apt-get install dnsutils -y
+# identify OS
+if [ -f /etc/os-release ]; then
+    # freedesktop.org and systemd
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+    IDLIKE=$ID_LIKE
+elif type lsb_release >/dev/null 2>&1; then
+    # linuxbase.org
+    OS=$(lsb_release -si)
+    VER=$(lsb_release -sr)
+elif [ -f /etc/lsb-release ]; then
+    # For some versions of Debian/Ubuntu without lsb_release command
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+elif [ -f /etc/debian_version ]; then
+    # Older Debian/Ubuntu/etc.
+    OS=Debian
+    VER=$(cat /etc/debian_version)
+elif [ -f /etc/SuSe-release ]; then
+    # Older SuSE/etc.
+    OS=SuSE
+    VER=$(cat /etc/SuSe-release)
+elif [ -f /etc/redhat-release ]; then
+    # Older Red Hat, CentOS, etc.
+    OS=RedHat
+    VER=$(cat /etc/redhat-release)
 else
-   echo "Unknown Platform, the install might fail"
+    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+    OS=$(uname -s)
+    VER=$(uname -r)
+fi
+
+# Setup prereqs for server
+# common named prereqs
+prereq="curl wget unzip tar"
+echo "Installing prerequisites"
+if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]; then
+    prereq+=" dnsutils"
+    apt-get update
+    apt-get install -y  "${prereq}" # git
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]; then
+    prereq+=" bind-utils"
+    yum update -y
+    yum install -y "${prereq}"   #  git
+else
+    echo "Unsupported OS"
+    # here you could ask the user for permission to try and install anyway
+    # if they say yes, then do the install
+    # if they say no, exit the script
+    exit 1
 fi
 
 cd /opt/rustdesk/

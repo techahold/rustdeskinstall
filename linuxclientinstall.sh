@@ -3,17 +3,60 @@
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c8)
 
-# Install Rustdesk
-if [[ $(which yum) ]]; then
-   wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
-   sudo yum localinstall ./rustdesk-1.1.9.rpm
-elif [[ $(which apt) ]]; then
-   wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
-   sudo apt install -fy ./rustdesk-1.1.9.deb
+
+# identify OS
+if [ -f /etc/os-release ]; then
+    # freedesktop.org and systemd
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+    IDLIKE=$ID_LIKE
+elif type lsb_release >/dev/null 2>&1; then
+    # linuxbase.org
+    OS=$(lsb_release -si)
+    VER=$(lsb_release -sr)
+elif [ -f /etc/lsb-release ]; then
+    # For some versions of Debian/Ubuntu without lsb_release command
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+elif [ -f /etc/debian_version ]; then
+    # Older Debian/Ubuntu/etc.
+    OS=Debian
+    VER=$(cat /etc/debian_version)
+elif [ -f /etc/SuSe-release ]; then
+    # Older SuSE/etc.
+    OS=SuSE
+    VER=$(cat /etc/SuSe-release)
+elif [ -f /etc/redhat-release ]; then
+    # Older Red Hat, CentOS, etc.
+    OS=RedHat
+    VER=$(cat /etc/redhat-release)
 else
-   echo "Unknown Platform, the install will fail"
-   exit
-fi
+    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+    OS=$(uname -s)
+    VER=$(uname -r)
+
+# Install Rustdesk
+case ${OS,,} in
+        # or case ${IDLIKE,,} in .. to support derivatives
+    ubuntu|debian)
+        # Debian/Ubuntu/etc.
+          wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
+         sudo apt install -fy ./rustdesk-1.1.9.deb
+         ;;
+      fedora|centos|redhat|amazon)
+         # Red Hat, CentOS, etc.
+
+         wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
+         sudo yum localinstall ./rustdesk-1.1.9.rpm
+         # sudo dnf install -y ./rustdesk-1.1.9.rpm
+         ;;
+      *)
+         echo "Unsupported OS"
+         exit 1
+         ;;
+esac
 
 rustdesk --password ${admintoken}
 pkill -f "rustdesk"
@@ -50,7 +93,7 @@ EOF
 )"
 echo "${rustdesktoml2b}" | sudo tee /root/.config/rustdesk/RustDesk2.toml > /dev/null
 
-chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml 
+chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml
 
 
 systemctl restart rustdesk
