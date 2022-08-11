@@ -14,7 +14,12 @@ if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS=$NAME
     VER=$VERSION_ID
-    IDLIKE=$ID_LIKE
+    UPSTREAM_ID=${ID_LIKE,,}
+    # Fallback to ID_LIKE if ID was not 'ubuntu' or 'debian'
+    if [ "${UPSTREAM_ID}" != "debian" ] && [ "${UPSTREAM_ID}" != "ubuntu" ]; then
+        UPSTREAM_ID="$(echo ${ID_LIKE,,} | sed s/\"//g | cut -d' ' -f1)"
+    fi
+
 elif type lsb_release >/dev/null 2>&1; then
     # linuxbase.org
     OS=$(lsb_release -si)
@@ -42,18 +47,28 @@ else
     VER=$(uname -r)
 fi
 
+
+# output ebugging info if $DEBUG set
+if [ "$DEBUG" = "true" ]; then
+    echo "OS: $OS"
+    echo "VER: $VER"
+    echo "UPSTREAM_ID: $UPSTREAM_ID"
+    exit 0
+fi
+
+
 # Setup prereqs for server
 # common named prereqs
 prereq="curl wget unzip tar"
 echo "Installing prerequisites"
-if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]; then
+if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     prereq+=" dnsutils"
-    apt-get update
-    apt-get install -y  "${prereq}" # git
+    sudo apt-get update
+    sudo apt-get install -y  "${prereq}" # git
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]; then
     prereq+=" bind-utils"
-    yum update -y
-    yum install -y "${prereq}"   #  git
+    sudo yum update -y
+    sudo yum install -y "${prereq}"   #  git
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
