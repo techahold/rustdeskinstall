@@ -57,12 +57,16 @@ fi
 
 # Setup prereqs for server
 # common named prereqs
-PREREQ="curl wget unzip tar"
+PREREQ1="curl"
+PREREQ2="wget"
+PREREQ3="unzip"
+PREREQ4="tar"
+
 echo "Installing prerequisites"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     PREREQ+=" dnsutils"
     sudo apt-get update
-    sudo apt-get install -y  "${PREREQ}" # git
+    sudo apt-get install -y  "${PREREQ1}" "${PREREQ2}" "${PREREQ3}" # git
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
 # opensuse 15.4 fails to run the relay service and hangs waiting for it
 # needs more work before it can be enabled
