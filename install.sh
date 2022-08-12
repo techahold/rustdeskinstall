@@ -70,12 +70,49 @@ else
     VER=$(uname -r)
 fi
 
+case ${ID} in
+    ubuntu|debian)
+        UPSTREAM_ID=debian
+        ;;
+esac
+# select package manager for $OS
+case $UPSTREAM_ID} in
+    ubuntu|debian)
+        # prefer apt-get over apt
+        PKG_INSTALL="sudo apt-get install -y"
+        PKG_UPDATE="sudo apt-get update && sudo apt-get upgrade -y"
+        ;;
+    rhel|redhat)
+        # yum or dnf
+        if [[ $(command -v dnf) ]]; then
+            PKG_INSTALL="sudo dnf -y install"
+            PKG_UPDATE="sudo dnf -y upgrade"
+        else
+            PKG_INSTALL="sudo yum install -y"
+            PKG_UPDATE="sudo yum update -y"
+            #PKG_UPDATE="sudo yum upgrade -y"
+        fi
+        ;;
+    suse)
+        # zypper over yast
+
+        if [[ $(command -v zypper) ]]; then
+            PKG_INSTALL="sudo zypper --non-interactive install"
+            PKG_UPDATE="sudo zypper --non-interactive update"
+            #PKG_UPGRADE="sudo zypper --non-interactive patch"
+        else
+            PKG_INSTALL="sudo yast install"
+            PKG_UPDATE="echo There is no zypper ..."
+        fi
+        ;;
+esac
 
 # output ebugging info if $DEBUG set
 if [ "$DEBUG" = "true" ]; then
     echo "OS: $OS"
     echo "VER: $VER"
     echo "UPSTREAM_ID: $UPSTREAM_ID"
+    echo "PKG_INSTALL: ${PKG_INSTALL}"
     exit 0
 fi
 
@@ -85,15 +122,8 @@ PREREQ="curl wget unzip tar"
 echo "Installing prerequisites"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     PREREQ+=" dnsutils"
-    sudo apt-get update
-    sudo apt-get install -y  "${PREREQ}" # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
-# opensuse 15.4 fails to run the relay service and hangs waiting for it
-# needs more work before it can be enabled
-# || [ "${UPSTREAM_ID}" = "suse" ]
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] || [ "${UPSTREAM_ID}" = "suse" ]; then
     PREREQ+=" bind-utils"
-    sudo yum update -y
-    sudo yum install -y "${PREREQ}"   #  git
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
@@ -102,29 +132,9 @@ else
     exit 1
 fi
 
-# #/*
-# Alternatively since case is faster than if then else
-# case ${IDLIKE} in
-#     ubuntu|debian)
-#         # Debian/Ubuntu/etc.
-#         sudo apt-get update
-#         sudo apt-get install -y curl wget unzip dnsutils tar  #  git
-#         ;;
-#     centos|fedora|redhat) #|amazon)
-#         # CentOS/RedHat/Fedora/Amazon/etc.
-#         sudo yum update -y
-#         sudo yum install -y curl wget unzip bind-utils tar #  git
-#         ;;
-#     *)
-#         echo "Unsupported OS"
-#         echo "Unknown Platform, the install might fail"
-#         # here you could ask the user for permission to try and install anyway
-#         # if they say yes, then do the install
-#         # if they say no, exit the script
-#         exit 1
-#         ;;
-#     esac
-# */
+ ${PKG_UPDATE}
+ ${PKG_INSTALL} "${PREREQ}" # git
+
 
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then

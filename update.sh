@@ -47,35 +47,62 @@ else
     VER=$(uname -r)
 fi
 
+case ${ID} in
+    ubuntu|debian)
+        UPSTREAM_ID=debian
+        ;;
+esac
+# select package manager for $OS
+case $UPSTREAM_ID} in
+    ubuntu|debian)
+        # prefer apt-get over apt
+        PKG_INSTALL="sudo apt-get install -y"
+        PKG_UPDATE="sudo apt-get update && sudo apt-get upgrade -y"
+        ;;
+    rhel|redhat)
+        # yum or dnf
+        if [[ $(command -v dnf) ]]; then
+            PKG_INSTALL="sudo dnf -y install"
+            PKG_UPDATE="sudo dnf -y upgrade"
+        else
+            PKG_INSTALL="sudo yum install -y"
+            PKG_UPDATE="sudo yum update -y"
+            #PKG_UPDATE="sudo yum upgrade -y"
+        fi
+        ;;
+    suse)
+        # zypper over yast
+
+        if [[ $(command -v zypper) ]]; then
+            PKG_INSTALL="sudo zypper --non-interactive install"
+            PKG_UPDATE="sudo zypper --non-interactive update"
+            #PKG_UPGRADE="sudo zypper --non-interactive patch"
+        else
+            PKG_INSTALL="sudo yast install"
+            PKG_UPDATE="echo There is no zypper ..."
+        fi
+        ;;
+esac
 
 # output ebugging info if $DEBUG set
 if [ "$DEBUG" = "true" ]; then
     echo "OS: $OS"
     echo "VER: $VER"
     echo "UPSTREAM_ID: $UPSTREAM_ID"
+    echo "PKG_INSTALL: ${PKG_INSTALL}"
     exit 0
 fi
-
 
 # Setup prereqs for server
 # common named prereqs
 PREREQ="curl wget unzip tar"
 echo "Installing prerequisites"
-if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
-    PREREQ+=" dnsutils"
-    sudo apt-get update
-    sudo apt-get install -y  "${PREREQ}" # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "${UPSTREAM_ID}" = "rhel" ]; then
-    PREREQ+=" bind-utils"
-    sudo yum update -y
-    sudo yum install -y "${PREREQ}"   #  git
-else
-    echo "Unsupported OS"
-    # here you could ask the user for permission to try and install anyway
-    # if they say yes, then do the install
-    # if they say no, exit the script
-    exit 1
-fi
+# we would not be updating an unsupported OS
+# or better - refactor this and installation together
+
+
+ #${PKG_UPDATE}
+ ${PKG_INSTALL} "${PREREQ}" # git
 
 cd /opt/rustdesk/
 
