@@ -102,7 +102,8 @@ echo "Installing prerequisites"
 
 
  #${PKG_UPDATE}
- ${PKG_INSTALL} "${PREREQ}" # git
+ ${PKG_INSTALL} ${PREREQ}
+ # git
 
 cd /opt/rustdesk/
 

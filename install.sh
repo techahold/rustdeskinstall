@@ -133,7 +133,8 @@ else
 fi
 
  ${PKG_UPDATE}
- ${PKG_INSTALL} "${PREREQ}" # git
+ ${PKG_INSTALL} ${PREREQ}
+ # git
 
 
 # Make Folder /opt/rustdesk/
