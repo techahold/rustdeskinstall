@@ -103,32 +103,6 @@ break
 esac
 done
 
-
-
-# #/*
-# Alternatively since case is faster than if then else
-# case ${IDLIKE} in
-#     ubuntu|debian)
-#         # Debian/Ubuntu/etc.
-#         sudo apt-get update
-#         sudo apt-get install -y curl wget unzip dnsutils tar  #  git
-#         ;;
-#     centos|fedora|redhat) #|amazon)
-#         # CentOS/RedHat/Fedora/Amazon/etc.
-#         sudo yum update -y
-#         sudo yum install -y curl wget unzip bind-utils tar #  git
-#         ;;
-#     *)
-#         echo "Unsupported OS"
-#         echo "Unknown Platform, the install might fail"
-#         # here you could ask the user for permission to try and install anyway
-#         # if they say yes, then do the install
-#         # if they say no, exit the script
-#         exit 1
-#         ;;
-#     esac
-# */
-
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
     echo "Creating /opt/rustdesk"
