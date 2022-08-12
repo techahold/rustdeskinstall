@@ -1,5 +1,5 @@
 $ErrorActionPreference= 'silentlycontinue'
-# Replace wanipreg and keyreg with the relevant info for your install.
+# Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
 If (!(test-path "c:\temp")) {
     New-Item -ItemType Directory -Force -Path "c:\temp" > null
