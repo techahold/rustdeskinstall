@@ -83,11 +83,14 @@ fi
 # common named prereqs
 prereq="curl wget unzip tar"
 echo "Installing prerequisites"
-if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
+if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     prereq+=" dnsutils"
     sudo apt-get update
     sudo apt-get install -y  "${prereq}" # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]; then
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]  || [ "${UPSTREAM_ID}" = "redhat" ] ; then
+# opensuse 15.4 fails to run the relay service and hangs waiting for it
+# needs more work before it can be enabled
+# || [ "${UPSTREAM_ID}" = "suse" ]
     prereq+=" bind-utils"
     sudo yum update -y
     sudo yum install -y "${prereq}"   #  git

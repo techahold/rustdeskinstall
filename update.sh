@@ -61,7 +61,7 @@ fi
 # common named prereqs
 prereq="curl wget unzip tar"
 echo "Installing prerequisites"
-if [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
+if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     prereq+=" dnsutils"
     sudo apt-get update
     sudo apt-get install -y  "${prereq}" # git
