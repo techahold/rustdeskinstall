@@ -73,7 +73,7 @@ elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhe
 # needs more work before it can be enabled
 # || [ "${UPSTREAM_ID}" = "suse" ]
     sudo yum update -y
-    sudo apt-get install -y  "${PREREQ1}" "${PREREQ2}" "${PREREQ3}" "${PREREQ4}" "${PREREQRPM}" # git
+    sudo yum install -y  "${PREREQ1}" "${PREREQ2}" "${PREREQ3}" "${PREREQ4}" "${PREREQRPM}" # git
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
