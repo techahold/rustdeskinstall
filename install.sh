@@ -57,23 +57,20 @@ fi
 
 # Setup prereqs for server
 # common named prereqs
-PREREQ1="curl"
-PREREQ2="wget"
-PREREQ3="unzip"
-PREREQ4="tar"
+PREREQ="curl wget unzip tar"
 PREREQDEB="dnsutils"
 PREREQRPM="bind-utils"
 
 echo "Installing prerequisites"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
     sudo apt-get update
-    sudo apt-get install -y  "${PREREQ1}" "${PREREQ2}" "${PREREQ3}" "${PREREQ4}" "${PREREQDEB}" # git
+    sudo apt-get install -y  ${PREREQ} ${PREREQDEB} # git
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
 # opensuse 15.4 fails to run the relay service and hangs waiting for it
 # needs more work before it can be enabled
 # || [ "${UPSTREAM_ID}" = "suse" ]
     sudo yum update -y
-    sudo yum install -y  "${PREREQ1}" "${PREREQ2}" "${PREREQ3}" "${PREREQ4}" "${PREREQRPM}" # git
+    sudo yum install -y  ${PREREQ} ${PREREQRPM} # git
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
