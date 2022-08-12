@@ -1,5 +1,5 @@
 $ErrorActionPreference= 'silentlycontinue'
-# Replace wanipreg and keyreg with the relevant info
+# Replace wanipreg and keyreg with the relevant info for your install.
 
 If (!(test-path "c:\temp")) {
     New-Item -ItemType Directory -Force -Path "c:\temp" > null
