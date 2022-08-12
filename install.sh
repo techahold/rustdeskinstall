@@ -87,7 +87,7 @@ if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ 
     prereq+=" dnsutils"
     sudo apt-get update
     sudo apt-get install -y  "${prereq}" # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]  || [ "${UPSTREAM_ID}" = "redhat" ] ; then
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
 # opensuse 15.4 fails to run the relay service and hangs waiting for it
 # needs more work before it can be enabled
 # || [ "${UPSTREAM_ID}" = "suse" ]
