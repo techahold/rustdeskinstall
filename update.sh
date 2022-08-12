@@ -1,23 +1,80 @@
 #!/bin/bash
 
 # Get Username
-uname=$(whoami)
+uname=$(whoami) # not used btw .. yet
 
 sudo systemctl stop gohttpserver.service
 sudo systemctl stop rustdesksignal.service
 sudo systemctl stop rustdeskrelay.service
 
 
-# Setup prereqs for server
-if [[ $(which yum) ]]; then
-   sudo yum install unzip -y
-   sudo yum install bind-utils -y
-elif [[ $(which apt) ]]; then
-   sudo apt-get update
-   sudo apt-get install unzip -y
-   sudo apt-get install dnsutils -y
+# identify OS
+if [ -f /etc/os-release ]; then
+    # freedesktop.org and systemd
+    . /etc/os-release
+    OS=$NAME
+    VER=$VERSION_ID
+    UPSTREAM_ID=${ID_LIKE,,}
+    # Fallback to ID_LIKE if ID was not 'ubuntu' or 'debian'
+    if [ "${UPSTREAM_ID}" != "debian" ] && [ "${UPSTREAM_ID}" != "ubuntu" ]; then
+        UPSTREAM_ID="$(echo ${ID_LIKE,,} | sed s/\"//g | cut -d' ' -f1)"
+    fi
+
+elif type lsb_release >/dev/null 2>&1; then
+    # linuxbase.org
+    OS=$(lsb_release -si)
+    VER=$(lsb_release -sr)
+elif [ -f /etc/lsb-release ]; then
+    # For some versions of Debian/Ubuntu without lsb_release command
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+    VER=$DISTRIB_RELEASE
+elif [ -f /etc/debian_version ]; then
+    # Older Debian/Ubuntu/etc.
+    OS=Debian
+    VER=$(cat /etc/debian_version)
+elif [ -f /etc/SuSe-release ]; then
+    # Older SuSE/etc.
+    OS=SuSE
+    VER=$(cat /etc/SuSe-release)
+elif [ -f /etc/redhat-release ]; then
+    # Older Red Hat, CentOS, etc.
+    OS=RedHat
+    VER=$(cat /etc/redhat-release)
 else
-   echo "Unknown Platform, the install might fail"
+    # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+    OS=$(uname -s)
+    VER=$(uname -r)
+fi
+
+
+# output ebugging info if $DEBUG set
+if [ "$DEBUG" = "true" ]; then
+    echo "OS: $OS"
+    echo "VER: $VER"
+    echo "UPSTREAM_ID: $UPSTREAM_ID"
+    exit 0
+fi
+
+
+# Setup prereqs for server
+# common named prereqs
+PREREQ="curl wget unzip tar"
+echo "Installing prerequisites"
+if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
+    PREREQ+=" dnsutils"
+    sudo apt-get update
+    sudo apt-get install -y  "${PREREQ}" # git
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "${UPSTREAM_ID}" = "rhel" ]; then
+    PREREQ+=" bind-utils"
+    sudo yum update -y
+    sudo yum install -y "${PREREQ}"   #  git
+else
+    echo "Unsupported OS"
+    # here you could ask the user for permission to try and install anyway
+    # if they say yes, then do the install
+    # if they say no, exit the script
+    exit 1
 fi
 
 cd /opt/rustdesk/
@@ -26,7 +83,7 @@ cd /opt/rustdesk/
 rm hbbs
 rm hbbs
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
 unzip rustdesk-server-linux-x64.zip
 
 sudo systemctl start rustdesksignal.service
@@ -38,16 +95,15 @@ while ! [[ $CHECK_RUSTDESK_READY ]]; do
   sleep 3
 done
 
-sudo rm rustdesk-server-linux-x64.zip
+rm rustdesk-server-linux-x64.zip
 
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-sudo wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
-sudo rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 
 sudo systemctl start gohttpserver.service
 
 echo -e "Updates are complete"
-
