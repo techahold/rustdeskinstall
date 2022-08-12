@@ -65,7 +65,7 @@ if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ 
     prereq+=" dnsutils"
     sudo apt-get update
     sudo apt-get install -y  "${prereq}" # git
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]; then
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "${UPSTREAM_ID}" = "rhel" ]; then
     prereq+=" bind-utils"
     sudo yum update -y
     sudo yum install -y "${prereq}"   #  git
@@ -107,4 +107,3 @@ rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
 sudo systemctl start gohttpserver.service
 
 echo -e "Updates are complete"
-
