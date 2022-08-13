@@ -184,6 +184,13 @@ key=$(cat "${pubname}")
 
 rm rustdesk-server-linux-x64.zip
 
+# Choice for DNS or IP
+PS3='Please choose if you want to download configs and install HTTP server:'
+EXTRA=("Yes" "No")
+select EXTRAOPT in "${EXTRA[@]}"; do
+case $EXTRAOPT in
+"Yes")
+
 # Create windows install script
 wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
 sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
@@ -260,4 +267,26 @@ exit ;
 else
 echo "waiting for the keypress"
 fi
+done
+break
+;;
+
+"No")
+echo -e "Your IP/DNS Address is ${wanip}"
+echo -e "Your public key is ${key}"
+echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
+
+echo "Press any key to finish install"
+while [ true ] ; do
+read -t 3 -n 1
+if [ $? = 0 ] ; then
+exit ;
+else
+echo "waiting for the keypress"
+fi
+done
+break
+;;
+*) echo "invalid option $REPLY";;
+esac
 done
