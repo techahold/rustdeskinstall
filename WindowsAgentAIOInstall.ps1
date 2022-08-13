@@ -1,4 +1,5 @@
 $ErrorActionPreference= 'silentlycontinue'
+#Requires -RunAsAdministrator
 # Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
 If (!(test-path "c:\temp")) {
