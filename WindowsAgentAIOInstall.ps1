@@ -85,7 +85,7 @@ serial = 0
 
 [options]
 custom-rendezvous-server = 'wanipreg'
-key =  keyreg'
+key =  'keyreg'
 relay-server = 'wanipreg'
 api-server = 'https://wanipreg'
 enable-audio = 'N'
