@@ -60,7 +60,7 @@ case ${OS,,} in
 esac
 
 rustdesk --password ${admintoken}
-pkill -f "rustdesk"
+sudo pkill -f "rustdesk"
 
 # Setup Rustdesk in user profile
 rustdesktoml2a="$(cat << EOF
@@ -94,10 +94,10 @@ EOF
 )"
 echo "${rustdesktoml2b}" | sudo tee /root/.config/rustdesk/RustDesk2.toml > /dev/null
 
-chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml
+sudo chown ${uname}:${uname} /home/${uname}/.config/rustdesk/RustDesk2.toml
 
 
-systemctl restart rustdesk
+sudo systemctl restart rustdesk
 
 echo "ID & Password for Rustdesk ${uname} are:"
 grep -w id /home/${uname}/.config/rustdesk/RustDesk.toml
