@@ -31,7 +31,13 @@ If (!(Test-Path "C:\Program Files\Rustdesk\RustDesk.exe")) {
 
   cd $env:Temp
 
-  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$restdesk_version/rustdesk-$restdesk_version-windows_x64.zip -Outfile rustdesk.zip
+  If ([Environment]::Is64BitOperatingSystem) {
+    $os_arch = "x64"
+  } Else {
+    $os_arch = "x32"
+  }
+
+  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$restdesk_version/rustdesk-$restdesk_version-windows_$os_arch.zip -Outfile rustdesk.zip
 
   Expand-Archive rustdesk.zip
   cd rustdesk
@@ -66,6 +72,10 @@ $urlhandler_ps1 = @"
   Remove-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
 
   Start-Sleep -s 20
+
+  # Cleanup Tempfiles
+  cd $env:Temp
+  Remove-Item $env:Temp\rustdesk -Recurse
 }
 
 # Write config
