@@ -27,7 +27,7 @@ If (!(Test-Path $env:Temp)) {
 
 cd $env:Temp
 
-If (!(Test-Path "C:\Program Files\Rustdesk\RustDesk.exe")) {
+If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   cd $env:Temp
 
@@ -63,7 +63,7 @@ If (!(Test-Path "C:\Program Files\Rustdesk\RustDesk.exe")) {
 $urlhandler_ps1 = @"
   `$url_handler = `$args[0]
   `$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''
-  Start-Process -FilePath 'C:\Program Files\RustDesk\rustdesk.exe' -ArgumentList "--connect `$rustdesk_id"
+  Start-Process -FilePath '$env:ProgramFiles\RustDesk\rustdesk.exe' -ArgumentList "--connect `$rustdesk_id"
 "@
 
   New-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
@@ -94,16 +94,16 @@ enable-audio = 'N'
 
 New-Item $env:AppData\RustDesk\config\RustDesk2.toml
 Set-Content $env:AppData\RustDesk\config\RustDesk2.toml $RustDesk2_toml
-New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml
+New-Item $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
+Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml
 
 $random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 24 | % {[char]$_}))
-start "C:\Program Files\RustDesk\RustDesk.exe" "--password $random_pass"
+start "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $random_pass"
 
 Start-Sleep -s 5
 
 # Get RustDesk ID
-If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
+If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
   $rustdesk_id = (Get-Content $env:AppData\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
   $rustdesk_id = $rustdesk_id.Split("'")[1]
   $rustdesk_pw = (Get-Content $env:AppData\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
@@ -113,9 +113,9 @@ If (!("C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\R
   OutputIDandPW $rustdesk_id $rustdesk_pw
 
 } Else {
-  $rustdesk_id = (Get-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
+  $rustdesk_id = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
   $rustdesk_id = $rustdesk_id.Split("'")[1]
-  $rustdesk_pw = (Get-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
+  $rustdesk_pw = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
   $rustdesk_pw = $rustdesk_pw.Split("'")[1]
   Write-Output "Config file found in windows service folder"
 
