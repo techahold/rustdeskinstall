@@ -25,8 +25,6 @@ If (!(Test-Path $env:Temp)) {
   New-Item -ItemType Directory -Force -Path $env:Temp > null
 }
 
-cd $env:Temp
-
 If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   cd $env:Temp
@@ -109,18 +107,14 @@ If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\
   $rustdesk_pw = (Get-Content $env:AppData\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
   $rustdesk_pw = $rustdesk_pw.Split("'")[1]
   Write-Output("Config file found in user folder")
-
   OutputIDandPW $rustdesk_id $rustdesk_pw
-
 } Else {
   $rustdesk_id = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
   $rustdesk_id = $rustdesk_id.Split("'")[1]
   $rustdesk_pw = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
   $rustdesk_pw = $rustdesk_pw.Split("'")[1]
   Write-Output "Config file found in windows service folder"
-
   OutputIDandPW $rustdesk_id $rustdesk_pw
-
 }
 
 Start-Sleep -s 10
