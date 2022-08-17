@@ -39,7 +39,7 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   Expand-Archive rustdesk.zip
   cd rustdesk
-  start .\rustdesk-$restdesk_version-putes.exe --silent-install
+  Start .\rustdesk-$restdesk_version-putes.exe --silent-install
 
   # Set URL Handler
   New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" > null
@@ -55,8 +55,8 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
   $rustdesklauncher = '"' + $env:ProgramFiles + '\RustDesk\RustDeskURLLauncher.exe" %1"'
   Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value $rustdesklauncher > null
 
-  Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force  > null
-  Install-Module ps2exe -Force  > null
+  Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force > null
+  Install-Module ps2exe -Force > null
 
 $urlhandler_ps1 = @"
   `$url_handler = `$args[0]
@@ -67,13 +67,14 @@ $urlhandler_ps1 = @"
   New-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
   Set-Content "$env:ProgramFiles\RustDesk\urlhandler.ps1" $urlhandler_ps1 > null
   Invoke-Ps2Exe "$env:ProgramFiles\RustDesk\urlhandler.ps1" "$env:ProgramFiles\RustDesk\RustDeskURLLauncher.exe" > null
-  Remove-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
 
   Start-Sleep -s 20
 
   # Cleanup Tempfiles
+  Remove-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
   cd $env:Temp
-  Remove-Item $env:Temp\rustdesk -Recurse
+  Remove-Item $env:Temp\rustdesk -Recurse > null
+  Remove-Item $env:Temp\rustdesk.zip > null
 }
 
 # Write config
@@ -90,13 +91,18 @@ api-server = 'https://wanipreg'
 enable-audio = 'N'
 "@
 
-New-Item $env:AppData\RustDesk\config\RustDesk2.toml
-Set-Content $env:AppData\RustDesk\config\RustDesk2.toml $RustDesk2_toml
-New-Item $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml
+If (!(Test-Path $env:AppData\RustDesk\config\RustDesk2.toml)) {
+  New-Item $env:AppData\RustDesk\config\RustDesk2.toml > null
+}
+Set-Content $env:AppData\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
+
+If (!(Test-Path $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml)) {
+  New-Item $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml > null
+}
+Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
 
 $random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 24 | % {[char]$_}))
-start "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $random_pass"
+Start "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $random_pass"
 
 Start-Sleep -s 5
 
@@ -119,5 +125,5 @@ If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\
 
 Start-Sleep -s 10
 
-taskkill /IM "rustdesk.exe" /F > null
-net start rustdesk > null
+Stop-Process -Name RustDesk -Force > null
+Start-Service -Name RustDesk > null
