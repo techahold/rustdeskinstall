@@ -18,6 +18,7 @@ function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
   Write-Output("")
   Write-Output("  RustDesk-ID:       $rustdesk_id")
   Write-Output("  RustDesk-Password: $rustdesk_pw")
+  Write-Output("")
 }
 
 If (!(Test-Path $env:Temp)) {
