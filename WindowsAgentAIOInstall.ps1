@@ -85,10 +85,10 @@ serial = 0
 
 [options]
 custom-rendezvous-server = 'wanipreg'
-key =  keyreg'
+key =  'keyreg'
 relay-server = 'wanipreg'
 api-server = 'https://wanipreg'
-enable-audio = YN'
+enable-audio = 'N'
 "@
 
 If (!(Test-Path $env:AppData\RustDesk\config\RustDesk2.toml)) {
