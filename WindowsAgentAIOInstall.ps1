@@ -13,7 +13,7 @@ Specifies the length of the password to connect to the RustDesk client
 EnableAudio in RustDesk client.
 .EXAMPLE
 .\WindowsAgentAIOInstall.ps1 -WanIPREG "somehost.example.tld" -KeyReg "KeyFromServer="
-  Install RustDesk Client
+  Install RustDesk Client with defining a different ID/Relay server and corresponding key
 .EXAMPLE
 .\WindowsAgentAIOInstall.ps1 -WanIPREG "somehost.example.tld" -KeyReg "KeyFromServer=" -PasswordLength 24
   Optionally define length for client password
@@ -24,8 +24,8 @@ EnableAudio in RustDesk client.
 #>
 
 Param(
-  [Parameter(Mandatory=$True)][string]$WanIPReg,
-  [Parameter(Mandatory=$True)][string]$KeyReg,
+  [string]$WanIPReg = "wanipreg",
+  [string]$KeyReg = "keyreg",
   [int]$PasswordLength = 8,
   [bool]$EnableAudio = $True
 )
