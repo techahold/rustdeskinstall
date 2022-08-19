@@ -1,13 +1,37 @@
+<#
+.SYNOPSIS
+Install and configure RustDesk Client
+.DESCRIPTION
+Deployment script to deploy the latest RustDesk (https://rustdesk.com/) client on a windows computer. Use described parameters to configure the client.
+.PARAMETER WanIPReg
+The IP address or FQDN of the RustDesk ID Server and Relay Server
+.PARAMETER KeyReg
+Specifies the key of ID/Relay Server
+.PARAMETER PasswordLength
+Specifies the length of the password to connect to the RustDesk client
+.PARAMETER EnableAudio
+EnableAudio in RustDesk client.
+.EXAMPLE
+.\WindowsAgentAIOInstall.ps1 -WanIPREG "somehost.example.tld" -KeyReg "KeyFromServer="
+  Install RustDesk Client
+.EXAMPLE
+.\WindowsAgentAIOInstall.ps1 -WanIPREG "somehost.example.tld" -KeyReg "KeyFromServer=" -PasswordLength 24
+  Optionally define length for client password
+.EXAMPLE
+.\WindowsAgentAIOInstall.ps1 -WanIPREG "somehost.example.tld" -KeyReg "KeyFromServer=" -EnableAudio 0
+  Optionally disable audio
+
+#>
+
+Param(
+  [Parameter(Mandatory=$True)][string]$WanIPReg,
+  [Parameter(Mandatory=$True)][string]$KeyReg,
+  [int]$PasswordLength = 8,
+  [bool]$EnableAudio = $True
+)
+
 $ErrorActionPreference= 'silentlycontinue'
 #Requires -RunAsAdministrator
-# Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
-
-$restdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
-$request = [System.Net.WebRequest]::Create($restdesk_url)
-$response = $request.GetResponse()
-$realTagUrl = $response.ResponseUri.OriginalString
-$restdesk_version = $realTagUrl.split('/')[-1].Trim('v')
-Write-Output("Installing RestDesk version $restdesk_version")
 
 function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
   Write-Output("######################################################")
@@ -34,6 +58,14 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
   } Else {
     $os_arch = "x32"
   }
+
+  #Get latest version number
+  $restdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
+  $request = [System.Net.WebRequest]::Create($restdesk_url)
+  $response = $request.GetResponse()
+  $realTagUrl = $response.ResponseUri.OriginalString
+  $restdesk_version = $realTagUrl.split('/')[-1].Trim('v')
+  Write-Output("Installing RestDesk version $restdesk_version")
 
   Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$restdesk_version/rustdesk-$restdesk_version-windows_$os_arch.zip -Outfile rustdesk.zip
 
@@ -77,18 +109,24 @@ $urlhandler_ps1 = @"
   Remove-Item $env:Temp\rustdesk.zip > null
 }
 
+If ($EnableAudio) {
+  $Audio = 'Y'
+} Else {
+  $Audio = 'N'
+}
+
 # Write config
 $RustDesk2_toml = @"
-rendezvous_server = 'wanipreg'
+rendezvous_server = '$WanIPReg'
 nat_type = 1
 serial = 0
 
 [options]
-custom-rendezvous-server = 'wanipreg'
-key =  'keyreg'
-relay-server = 'wanipreg'
-api-server = 'https://wanipreg'
-enable-audio = 'N'
+custom-rendezvous-server = '$WanIPReg'
+key =  '$KeyReg'
+relay-server = '$WanIPReg'
+api-server = 'https://$WanIPReg'
+enable-audio = '$Audio'
 "@
 
 If (!(Test-Path $env:AppData\RustDesk\config\RustDesk2.toml)) {
@@ -101,7 +139,7 @@ If (!(Test-Path $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDes
 }
 Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
 
-$random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 24 | % {[char]$_}))
+$random_pass = (-join ((65..90) + (97..122) | Get-Random -Count $PasswordLength | % {[char]$_}))
 Start "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $random_pass"
 
 Start-Sleep -s 5
