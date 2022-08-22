@@ -7,7 +7,7 @@ $request = [System.Net.WebRequest]::Create($rustdesk_url)
 $response = $request.GetResponse()
 $realTagUrl = $response.ResponseUri.OriginalString
 $rustdesk_version = $realTagUrl.split('/')[-1].Trim('v')
-Write-Output("Installing RestDesk version $rustdesk_version")
+Write-Output("Installing Rustdesk version $rustdesk_version")
 
 function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
   Write-Output("######################################################")
@@ -35,11 +35,11 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
     $os_arch = "x32"
   }
 
-  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$restdesk_version/rustdesk-$restdesk_version-windows_$os_arch.zip -Outfile rustdesk.zip
+  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$rustdesk_version/rustdesk-$rustdesk_version-windows_$os_arch.zip -Outfile rustdesk.zip
 
   Expand-Archive rustdesk.zip
   cd rustdesk
-  Start .\rustdesk-$restdesk_version-putes.exe --silent-install
+  Start .\rustdesk-$rustdesk_version-putes.exe --silent-install
 
   # Set URL Handler
   New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" > null
