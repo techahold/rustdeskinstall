@@ -2,12 +2,12 @@ $ErrorActionPreference= 'silentlycontinue'
 #Requires -RunAsAdministrator
 # Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
-$restdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
-$request = [System.Net.WebRequest]::Create($restdesk_url)
+$rustdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
+$request = [System.Net.WebRequest]::Create($rustdesk_url)
 $response = $request.GetResponse()
 $realTagUrl = $response.ResponseUri.OriginalString
-$restdesk_version = $realTagUrl.split('/')[-1].Trim('v')
-Write-Output("Installing RestDesk version $restdesk_version")
+$rustdesk_version = $realTagUrl.split('/')[-1].Trim('v')
+Write-Output("Installing RestDesk version $rustdesk_version")
 
 function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
   Write-Output("######################################################")
