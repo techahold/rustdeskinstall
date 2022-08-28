@@ -39,7 +39,7 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   Expand-Archive rustdesk.zip
   cd rustdesk
-  Start .\rustdesk-$rustdesk_version-putes.exe --silent-install
+  Start-Process "rustdesk-$rustdesk_version-putes.exe" -argumentlist "--silent-install" -wait
 
   # Set URL Handler
   New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" > null
@@ -67,8 +67,6 @@ $urlhandler_ps1 = @"
   New-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
   Set-Content "$env:ProgramFiles\RustDesk\urlhandler.ps1" $urlhandler_ps1 > null
   Invoke-Ps2Exe "$env:ProgramFiles\RustDesk\urlhandler.ps1" "$env:ProgramFiles\RustDesk\RustDeskURLLauncher.exe" > null
-
-  Start-Sleep -s 20
 
   # Cleanup Tempfiles
   Remove-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
@@ -101,10 +99,8 @@ If (!(Test-Path $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDes
 }
 Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
 
-$random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 24 | % {[char]$_}))
-Start "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $random_pass"
-
-Start-Sleep -s 5
+$random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
+Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe"  -argumentlist "--password $random_pass" -wait
 
 # Get RustDesk ID
 If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
@@ -122,8 +118,6 @@ If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\
   Write-Output "Config file found in windows service folder"
   OutputIDandPW $rustdesk_id $rustdesk_pw
 }
-
-Start-Sleep -s 10
 
 Stop-Process -Name RustDesk -Force > null
 Start-Service -Name RustDesk > null
