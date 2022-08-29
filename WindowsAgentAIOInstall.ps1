@@ -1,5 +1,11 @@
 $ErrorActionPreference= 'silentlycontinue'
-#Requires -RunAsAdministrator
+#Run as administrator and stays in the current directory
+if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
+        Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$pwd'; & '$PSCommandPath';`"";
+        Exit;
+    }
+}
 # Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
 $rustdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
