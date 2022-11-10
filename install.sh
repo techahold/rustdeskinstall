@@ -190,7 +190,7 @@ done
 pubname=$(find /opt/rustdesk -name "*.pub")
 key=$(cat "${pubname}")
 
-rm rustdesk-server-linux-x64.zip
+rm rustdesk-server-linux-amd64.zip
 
 # Choice for DNS or IP
 PS3='Please choose if you want to download configs and install HTTP server:'
