@@ -121,6 +121,8 @@ wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/
 unzip rustdesk-server-linux-amd64.zip
 cd amd64
 mv * /opt/rustdesk/
+chmod +x /opt/rustdesk/hbbs
+chmod +x /opt/rustdesk/hbbr
 
 # Make Folder /var/log/rustdesk/
 if [ ! -d "/var/log/rustdesk" ]; then
