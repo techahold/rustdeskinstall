@@ -10,7 +10,15 @@ if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS=$NAME
     VER=$VERSION_ID
-    IDLIKE=$ID_LIKE
+
+    UPSTREAM_ID=${ID_LIKE,,}
+
+    # Fallback to ID_LIKE if ID was not 'ubuntu' or 'debian'
+    if [ "${UPSTREAM_ID}" != "debian" ] && [ "${UPSTREAM_ID}" != "ubuntu" ]; then
+        UPSTREAM_ID="$(echo ${ID_LIKE,,} | sed s/\"//g | cut -d' ' -f1)"
+    fi
+
+
 elif type lsb_release >/dev/null 2>&1; then
     # linuxbase.org
     OS=$(lsb_release -si)
@@ -39,25 +47,20 @@ else
 fi
 
 # Install Rustdesk
-case ${OS,,} in
-        # or case ${IDLIKE,,} in .. to support derivatives
-    ubuntu|debian)
-        # Debian/Ubuntu/etc.
-          wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
-         sudo apt install -fy ./rustdesk-1.1.9.deb
-         ;;
-      fedora|centos|redhat|amazon)
-         # Red Hat, CentOS, etc.
-
-         wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
-         sudo yum localinstall ./rustdesk-1.1.9.rpm
-         # sudo dnf install -y ./rustdesk-1.1.9.rpm
-         ;;
-      *)
-         echo "Unsupported OS"
-         exit 1
-         ;;
-esac
+echo "Installing Rustdesk"
+if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
+    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
+    sudo apt install -fy ./rustdesk-1.1.9.deb
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
+    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
+    sudo yum localinstall ./rustdesk-1.1.9.rpm
+else
+    echo "Unsupported OS"
+    # here you could ask the user for permission to try and install anyway
+    # if they say yes, then do the install
+    # if they say no, exit the script
+    exit 1
+fi
 
 rustdesk --password ${admintoken}
 sudo pkill -f "rustdesk"
