@@ -28,3 +28,9 @@ chmod +x install.sh
 
 # Rustdesk windows powershell install script
 Generates a powershell script for install grabbing WAN IP and Key currently in /opt/rustdesk but will be moved to a web url for easy deployment.
+
+# Tips
+
+if you want to restart the services use the following commands:
+sudo systemctl restart rustdesksignal
+sudo systemctl restart rustdeskrelay
