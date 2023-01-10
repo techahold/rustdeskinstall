@@ -73,6 +73,9 @@ elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhe
 # || [ "${UPSTREAM_ID}" = "suse" ]
     sudo yum update -y
     sudo yum install -y  ${PREREQ} ${PREREQRPM} # git
+elif [ "${ID}" = "arch" ] || [ "${UPSTREAM_ID}" = "arch" ]; then
+    sudo pacman -Syu
+    sudo pacman -S ${PREREQ} ${PREREQARCH}
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
