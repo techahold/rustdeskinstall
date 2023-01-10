@@ -72,7 +72,7 @@ elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhe
 # || [ "${UPSTREAM_ID}" = "suse" ]
     sudo yum update -y
     sudo yum install -y  ${PREREQ} ${PREREQRPM} # git
-elif [ "${ID}" = "arch" ]; then
+elif [ "${ID}" = "arch" ] || [ "${ID}" = "manjaro" ]; then
     sudo pacman -Syu
     sudo pacman -S ${PREREQ} ${PREREQARCH}
 else
