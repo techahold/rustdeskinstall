@@ -115,11 +115,32 @@ fi
 sudo chown "${uname}" -R /opt/rustdesk
 cd /opt/rustdesk/ || exit 1
 
+
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+
+# Choice for ARM or x64
+PS3='Choose your Architecture, ARM or x64 (Intel/AMD):'
+ARCH=("ARM" "x64")
+select ARCHOPT in "${ARCH[@]}"; do
+case $ARCHOPT in
+"ARM")
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-armv7.zip"
+unzip rustdesk-server-linux-armv7.zip
+mv armv7/* /opt/rustdesk/
+;;
+
+"x64")
+echo -ne "Enter your preferred domain/dns address ${NC}: "
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
 unzip rustdesk-server-linux-amd64.zip
 mv amd64/* /opt/rustdesk/
+break
+;;
+*) echo "invalid option $REPLY";;
+esac
+done
+
 chmod +x /opt/rustdesk/hbbs
 chmod +x /opt/rustdesk/hbbr
 
