@@ -131,7 +131,6 @@ mv armv7/* /opt/rustdesk/
 ;;
 
 "x64")
-echo -ne "Enter your preferred domain/dns address ${NC}: "
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
 unzip rustdesk-server-linux-amd64.zip
 mv amd64/* /opt/rustdesk/
@@ -240,8 +239,25 @@ fi
 sudo chown "${uname}" -R /opt/gohttp
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+
+# Choice for ARM or x64
+PS3='Choose your Architecture, ARM or x64 (Intel/AMD):'
+ARCH1=("ARM" "x64")
+select ARCH1OPT in "${ARCH1[@]}"; do
+case $ARCH1OPT in
+"ARM")
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
+tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
+;;
+
+"x64")
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+break
+;;
+*) echo "invalid option $REPLY";;
+esac
+done
 
 # Copy Rustdesk install scripts to folder
 mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
