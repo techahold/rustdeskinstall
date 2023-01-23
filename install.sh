@@ -4,6 +4,9 @@
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)
 
+ARCH=$(uname -m)
+
+
 # identify OS
 if [ -f /etc/os-release ]; then
     # freedesktop.org and systemd
@@ -119,26 +122,16 @@ cd /opt/rustdesk/ || exit 1
 #Download latest version of Rustdesk
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
-# Choice for ARM or x64
-PS3='Choose your Architecture, ARM or x64 (Intel/AMD):'
-ARCH=("ARM" "x64")
-select ARCHOPT in "${ARCH[@]}"; do
-case $ARCHOPT in
-"ARM")
-wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-armv7.zip"
-unzip rustdesk-server-linux-armv7.zip
-mv armv7/* /opt/rustdesk/
-;;
-
-"x64")
+echo "Installing Rustdesk Server"
+if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
 unzip rustdesk-server-linux-amd64.zip
 mv amd64/* /opt/rustdesk/
-break
-;;
-*) echo "invalid option $REPLY";;
-esac
-done
+elif [ "${ARCH}" = "armv7l" ] ; then
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-armv7.zip"
+unzip rustdesk-server-linux-armv7.zip
+mv armv7/* /opt/rustdesk/
+fi
 
 chmod +x /opt/rustdesk/hbbs
 chmod +x /opt/rustdesk/hbbr
@@ -210,9 +203,17 @@ done
 pubname=$(find /opt/rustdesk -name "*.pub")
 key=$(cat "${pubname}")
 
+echo "Tidying up install"
+if [ "${ARCH}" = "x86_64" ] ; then
 rm rustdesk-server-linux-amd64.zip
+rm -rf amd64
+elif [ "${ARCH}" = "armv7l" ] ; then
+rm rustdesk-server-linux-armv7.zip
+rm -rf armv7
+fi
 
-# Choice for DNS or IP
+
+# Choice for Extras installed
 PS3='Please choose if you want to download configs and install HTTP server:'
 EXTRA=("Yes" "No")
 select EXTRAOPT in "${EXTRA[@]}"; do
@@ -240,24 +241,14 @@ sudo chown "${uname}" -R /opt/gohttp
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
-# Choice for ARM or x64
-PS3='Choose your Architecture, ARM or x64 (Intel/AMD):'
-ARCH1=("ARM" "x64")
-select ARCH1OPT in "${ARCH1[@]}"; do
-case $ARCH1OPT in
-"ARM")
+echo "Installing Go HTTP Server"
+if [ "${ARCH}" = "x86_64" ] ; then
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
+elif [ "${ARCH}" = "armv7l" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
-;;
-
-"x64")
-wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
-tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
-break
-;;
-*) echo "invalid option $REPLY";;
-esac
-done
+fi
 
 # Copy Rustdesk install scripts to folder
 mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
@@ -270,7 +261,13 @@ if [ ! -d "/var/log/gohttp" ]; then
 fi
 sudo chown "${uname}" -R /var/log/gohttp/
 
+echo "Tidying up Go HTTP Server Install"
+if [ "${ARCH}" = "x86_64" ] ; then
 rm gohttpserver_"${GOHTTPLATEST}"_linux_amd64.tar.gz
+elif [ "${ARCH}" = "armv7l" ] ; then
+rm gohttpserver_"${GOHTTPLATEST}"_linux_arm64.tar.gz
+fi
+
 
 # Setup Systemd to launch Go HTTP Server
 gohttpserver="$(cat << EOF
