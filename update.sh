@@ -84,6 +84,14 @@ else
     exit 1
 fi
 
+
+if ! [ -e /opt/rustdesk  ]; then
+        echo "No directory /opt/rustdesk found. No update of rustdesk possible (used install.sh script ?) "
+        exit 4
+else
+        :
+fi
+
 cd /opt/rustdesk/
 
 #Download latest version of Rustdesk
@@ -91,7 +99,8 @@ rm hbbs
 rm hbbs
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
-unzip rustdesk-server-linux-amd64.zip
+unzip -j -o  rustdesk-server-linux-amd64.zip  "amd64/*" -d "/opt/rustdesk/"
+
 
 sudo systemctl start rustdesksignal.service
 sudo systemctl start rustdeskrelay.service
