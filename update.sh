@@ -90,8 +90,8 @@ cd /opt/rustdesk/
 rm hbbs
 rm hbbs
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-x64.zip"
-unzip rustdesk-server-linux-x64.zip
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
+unzip rustdesk-server-linux-amd64.zip
 
 sudo systemctl start rustdesksignal.service
 sudo systemctl start rustdeskrelay.service
@@ -102,7 +102,16 @@ while ! [[ $CHECK_RUSTDESK_READY ]]; do
   sleep 3
 done
 
-rm rustdesk-server-linux-x64.zip
+rm rustdesk-server-linux-amd64.zip
+
+# chk if gotthp exists
+
+if ! [ -e /opt/gohttp ]; then
+        echo "No directory /opt/gohttp found. No update of gothhtp necessary."
+        exit 4
+else
+        :
+fi
 
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
