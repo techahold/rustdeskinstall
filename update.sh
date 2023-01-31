@@ -136,9 +136,6 @@ wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATE
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
 fi
 
-rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
-rm gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
-
 sudo systemctl start gohttpserver.service
 
 echo -e "Updates are complete"
