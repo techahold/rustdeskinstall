@@ -7,6 +7,7 @@ sudo systemctl stop gohttpserver.service
 sudo systemctl stop rustdesksignal.service
 sudo systemctl stop rustdeskrelay.service
 
+ARCH=$(uname -m)
 
 # identify OS
 if [ -f /etc/os-release ]; then
@@ -93,9 +94,6 @@ else
 fi
 
 cd /opt/rustdesk/
-
-rm hbbs
-rm hbbs
 
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
