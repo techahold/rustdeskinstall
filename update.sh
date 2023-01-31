@@ -94,13 +94,19 @@ fi
 
 cd /opt/rustdesk/
 
-#Download latest version of Rustdesk
 rm hbbs
 rm hbbs
+
 RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+
+echo "Upgrading Rustdesk Server"
+if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
 unzip -j -o  rustdesk-server-linux-amd64.zip  "amd64/*" -d "/opt/rustdesk/"
-
+elif [ "${ARCH}" = "armv7l" ] ; then
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-armv7.zip"
+unzip -j -o  rustdesk-server-linux-armv7.zip  "armv7/*" -d "/opt/rustdesk/"
+fi
 
 sudo systemctl start rustdesksignal.service
 sudo systemctl start rustdeskrelay.service
@@ -124,10 +130,16 @@ fi
 
 cd /opt/gohttp
 GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
-tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
+elif [ "${ARCH}" = "armv7l" ] ; then
+wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
+tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
+fi
 
 rm gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz
+rm gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
 
 sudo systemctl start gohttpserver.service
 
