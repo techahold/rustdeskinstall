@@ -131,6 +131,10 @@ elif [ "${ARCH}" = "armv7l" ] ; then
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-armv7.zip"
 unzip rustdesk-server-linux-armv7.zip
 mv armv7/* /opt/rustdesk/
+elif [ "${ARCH}" = "aarch64" ] ; then
+wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-arm64v8.zip"
+unzip rustdesk-server-linux-arm64v8.zip
+mv arm64v8/* /opt/rustdesk/
 fi
 
 chmod +x /opt/rustdesk/hbbs
@@ -210,6 +214,9 @@ rm -rf amd64
 elif [ "${ARCH}" = "armv7l" ] ; then
 rm rustdesk-server-linux-armv7.zip
 rm -rf armv7
+elif [ "${ARCH}" = "aarch64" ] ; then
+rm rustdesk-server-linux-arm64v8.zip
+rm -rf arm64v8
 fi
 
 
@@ -245,7 +252,7 @@ echo "Installing Go HTTP Server"
 if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
-elif [ "${ARCH}" = "armv7l" ] ; then
+elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
 fi
@@ -264,7 +271,7 @@ sudo chown "${uname}" -R /var/log/gohttp/
 echo "Tidying up Go HTTP Server Install"
 if [ "${ARCH}" = "x86_64" ] ; then
 rm gohttpserver_"${GOHTTPLATEST}"_linux_amd64.tar.gz
-elif [ "${ARCH}" = "armv7l" ] ; then
+elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ]; then
 rm gohttpserver_"${GOHTTPLATEST}"_linux_arm64.tar.gz
 fi
 
