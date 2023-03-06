@@ -32,5 +32,7 @@ Generates a powershell script for install grabbing WAN IP and Key currently in /
 # Tips
 
 if you want to restart the services use the following commands:
+```
 sudo systemctl restart rustdesksignal
 sudo systemctl restart rustdeskrelay
+```
