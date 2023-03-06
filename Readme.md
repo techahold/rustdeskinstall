@@ -7,7 +7,7 @@ You can use Hetzner to test this with a $20 credit using this referal code https
 # How to Install the server
 Please setup your firewall on your server prior to running the script.
 
-Make sure you have got access via ssh or otherwise setup prior setting up the firewall, command for UFW is.
+Make sure you have got access via ssh or otherwise setup prior setting up the firewall, command for UFW is:
 ```
 ufw allow proto tcp from YOURIP to any port 22
 ```
