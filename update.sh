@@ -131,9 +131,12 @@ GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releas
 if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
-elif [ "${ARCH}" = "armv7l" ] ; then
+elif [ "${ARCH}" =  "aarch64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
+elif [ "${ARCH}" = "armv7l" ] ; then
+echo "Go HTTP Server not supported on 32bit ARM devices"
+exit 1
 fi
 
 sudo systemctl start gohttpserver.service
