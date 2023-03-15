@@ -1,5 +1,5 @@
 # Rustdesk server Install Script
-Easy install Script for Rustdesk on linux, should work on any 64bit debian or centos based system supporting systemd.<br>
+Easy install Script for Rustdesk on linux, should work on any 64bit (32bit arm will install rustdesk server only) debian or centos based system supporting systemd.<br>
 For Rustdesk visit https://rustdesk.com
 
 You can use Hetzner to test this with a $20 credit using this referal code https://hetzner.cloud/?ref=p6iUr7jEXmoB
