@@ -252,9 +252,14 @@ echo "Installing Go HTTP Server"
 if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
-elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ] ; then
+elif [ "${ARCH}" =  "aarch64" ] ; then
 wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
 tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
+elif [ "${ARCH}" = "armv7l" ] ; then
+echo "Go HTTP Server not supported on 32bit ARM devices"
+echo -e "Your IP/DNS Address is ${wanip}"
+echo -e "Your public key is ${key}"
+exit 1
 fi
 
 # Copy Rustdesk install scripts to folder
