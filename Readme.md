@@ -30,7 +30,7 @@ chmod +x install.sh
 Choose your preferences from the options given in the script.
 
 ***Please Note:***
-If you allow the script to create preconfigured files it will install gohttpserver using port 8000 for you to easily download the files.
+If you allow the script to create preconfigured install files (with your IP/DNS and key set) it will install gohttpserver using port 8000 for you to easily download the install scripts.
 
 # Rustdesk windows powershell install script
 Generates a powershell script for install grabbing WAN IP and Key currently in /opt/rustdesk but will be moved to a web url for easy deployment.
