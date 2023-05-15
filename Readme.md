@@ -29,7 +29,7 @@ chmod +x install.sh
 
 Choose your preferences from the options given in the script.
 
-***Please Note***
+***Please Note:***
 If you allow the script to create preconfigured files it will install gohttpserver using port 8000 for you to easily download the files.
 
 # Rustdesk windows powershell install script
