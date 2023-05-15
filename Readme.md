@@ -12,7 +12,7 @@ Make sure you have got access via ssh or otherwise setup prior setting up the fi
 ufw allow proto tcp from YOURIP to any port 22
 ```
 
-If you have UFW installed use the following commands:
+If you have UFW installed use the following commands (you only need port 8000 if you are using the preconfigured install files):
 ```
 ufw allow 21115:21119/tcp
 ufw allow 8000/tcp
@@ -26,6 +26,11 @@ wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/install
 chmod +x install.sh
 ./install.sh
 ```
+
+Choose your preferences from the options given in the script.
+
+***Please Note***
+If you allow the script to create preconfigured files it will install gohttpserver using port 8000 for you to easily download the files.
 
 # Rustdesk windows powershell install script
 Generates a powershell script for install grabbing WAN IP and Key currently in /opt/rustdesk but will be moved to a web url for easy deployment.
