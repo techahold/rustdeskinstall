@@ -36,9 +36,9 @@ If you allow the script to create preconfigured install files (with your IP/DNS 
 
 Run the following commands:
 ```
-wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/install.sh
-chmod +x install.sh
-./install.sh
+wget https://raw.githubusercontent.com/techahold/rustdeskinstall/master/update.sh
+chmod +x update.sh
+./update.sh
 ```
 
 # Rustdesk windows powershell install script
