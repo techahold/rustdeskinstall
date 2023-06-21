@@ -3,6 +3,15 @@
 # Get Username
 uname=$(whoami) # not used btw .. yet
 
+# Get current release version
+RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }' | sed 's/-.*//')
+RDCURRENT=$(/opt/rustdesk/hbbr --version | sed -r 's/hbbr (.*)-.*/\1/')
+
+if [ $RDLATEST == $RDCURRENT ]; then
+    echo "Same version no need to update."
+    exit 0
+fi
+
 sudo systemctl stop gohttpserver.service
 sudo systemctl stop rustdesksignal.service
 sudo systemctl stop rustdeskrelay.service
@@ -94,8 +103,6 @@ else
 fi
 
 cd /opt/rustdesk/
-
-RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk-server/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
 echo "Upgrading Rustdesk Server"
 if [ "${ARCH}" = "x86_64" ] ; then
