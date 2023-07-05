@@ -41,41 +41,13 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
     $os_arch = "x32"
   }
 
-  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/$rustdesk_version/rustdesk-$rustdesk_version-windows_$os_arch.zip -Outfile rustdesk.zip
+  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/1.2.0/rustdesk-1.2.0-x86_64.exe -Outfile rustdesk.exe
 
   Expand-Archive rustdesk.zip
   cd rustdesk
-  Start-Process "rustdesk-$rustdesk_version-putes.exe" -argumentlist "--silent-install" -wait
-
-  # Set URL Handler
-  New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk" > null
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "(Default)" -Value "URL:RustDesk Protocol" > null
-  New-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk" -Name "URL Protocol" -Type STRING > null
-
-  New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" > null
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\DefaultIcon" -Name "(Default)" -Value "RustDesk.exe,0" > null
-
-  New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell" > null
-  New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open" > null
-  New-Item -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" > null
-  $rustdesklauncher = '"' + $env:ProgramFiles + '\RustDesk\RustDeskURLLauncher.exe" %1"'
-  Set-ItemProperty -Path "HKLM:\SOFTWARE\Classes\RustDesk\shell\open\command" -Name "(Default)" -Value $rustdesklauncher > null
-
-  Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force > null
-  Install-Module ps2exe -Force > null
-
-$urlhandler_ps1 = @"
-  `$url_handler = `$args[0]
-  `$rustdesk_id = `$url_handler -creplace '(?s)^.*\:',''
-  Start-Process -FilePath '$env:ProgramFiles\RustDesk\rustdesk.exe' -ArgumentList "--connect `$rustdesk_id"
-"@
-
-  New-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
-  Set-Content "$env:ProgramFiles\RustDesk\urlhandler.ps1" $urlhandler_ps1 > null
-  Invoke-Ps2Exe "$env:ProgramFiles\RustDesk\urlhandler.ps1" "$env:ProgramFiles\RustDesk\RustDeskURLLauncher.exe" > null
+  Start-Process "rustdesk.exe" -argumentlist "--silent-install" -wait
 
   # Cleanup Tempfiles
-  Remove-Item "$env:ProgramFiles\RustDesk\urlhandler.ps1" > null
   cd $env:Temp
   Remove-Item $env:Temp\rustdesk -Recurse > null
   Remove-Item $env:Temp\rustdesk.zip > null
@@ -108,22 +80,18 @@ Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\co
 $random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
 Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe"  -argumentlist "--password $random_pass" -wait
 
-# Get RustDesk ID
-If (!("$env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml")) {
-  $rustdesk_id = (Get-Content $env:AppData\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
-  $rustdesk_id = $rustdesk_id.Split("'")[1]
-  $rustdesk_pw = (Get-Content $env:AppData\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
-  $rustdesk_pw = $rustdesk_pw.Split("'")[1]
-  Write-Output("Config file found in user folder")
-  OutputIDandPW $rustdesk_id $rustdesk_pw
-} Else {
-  $rustdesk_id = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("id") })
-  $rustdesk_id = $rustdesk_id.Split("'")[1]
-  $rustdesk_pw = (Get-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk.toml | Where-Object { $_.Contains("password") })
-  $rustdesk_pw = $rustdesk_pw.Split("'")[1]
-  Write-Output "Config file found in windows service folder"
-  OutputIDandPW $rustdesk_id $rustdesk_pw
+net stop rustdesk > null
+$ProcessActive = Get-Process rustdesk -ErrorAction SilentlyContinue
+if($ProcessActive -ne $null)
+{
+stop-process -ProcessName rustdesk -Force
 }
+
+$rustdesk_pw = (-join ((65..90) + (97..122) | Get-Random -Count 12 | % {[char]$_})) 
+Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $rustdesk_pw" -wait
+Write-Output "$rustdesk_pw"
+
+net start rustdesk > null
 
 Stop-Process -Name RustDesk -Force > null
 Start-Service -Name RustDesk > null
