@@ -43,8 +43,6 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/1.2.0/rustdesk-1.2.0-x86_64.exe -Outfile rustdesk.exe
 
-  Expand-Archive rustdesk.zip
-  cd rustdesk
   Start-Process "rustdesk.exe" -argumentlist "--silent-install" -wait
 
   # Cleanup Tempfiles
