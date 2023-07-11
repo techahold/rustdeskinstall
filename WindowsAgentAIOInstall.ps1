@@ -8,13 +8,6 @@ if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 # Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
-$rustdesk_url = 'https://github.com/rustdesk/rustdesk/releases/latest'
-$request = [System.Net.WebRequest]::Create($rustdesk_url)
-$response = $request.GetResponse()
-$realTagUrl = $response.ResponseUri.OriginalString
-$rustdesk_version = $realTagUrl.split('/')[-1].Trim('v')
-Write-Output("Installing Rustdesk version $rustdesk_version")
-
 function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
   Write-Output("######################################################")
   Write-Output("#                                                    #")
@@ -35,20 +28,13 @@ If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
   cd $env:Temp
 
-  If ([Environment]::Is64BitOperatingSystem) {
-    $os_arch = "x64"
-  } Else {
-    $os_arch = "x32"
-  }
-
   Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/1.2.0/rustdesk-1.2.0-x86_64.exe -Outfile rustdesk.exe
 
   Start-Process "rustdesk.exe" -argumentlist "--silent-install" -wait
 
   # Cleanup Tempfiles
   cd $env:Temp
-  Remove-Item $env:Temp\rustdesk -Recurse > null
-  Remove-Item $env:Temp\rustdesk.zip > null
+  Remove-Item $env:Temp\rustdesk.exe -Recurse > null
 }
 
 # Write config
