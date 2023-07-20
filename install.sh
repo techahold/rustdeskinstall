@@ -90,10 +90,17 @@ elif [ "${ID}" = "arch" ] || [ "${UPSTREAM_ID}" = "arch" ]; then
     sudo pacman -S ${PREREQ} ${PREREQARCH}
 else
     echo "Unsupported OS"
-    # here you could ask the user for permission to try and install anyway
-    # if they say yes, then do the install
-    # if they say no, exit the script
-    exit 1
+    # give them the option to continue
+    echo -n "Would you like to continue? Dependencies may not be satisfied... [y/n] "
+    read continue_no_dependencies
+    if [ $continue_no_dependencies == "y" ]; then
+        echo "Continuing..."
+    elif [ $continue_no_dependencies != "n" ]; then
+        echo "Invalid answer, exiting."
+	exit 1
+    else
+        exit 1
+    fi
 fi
 
 # Choice for DNS or IP
