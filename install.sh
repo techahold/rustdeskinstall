@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# If any command fails, fail out
-set -e
-
 # Many things here need root access, so verify user is root
 # If not, fail out and give an explanation
 if [ $(id -u) -ne 0 ]; then
