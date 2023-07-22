@@ -47,13 +47,15 @@ else
 fi
 
 # Install Rustdesk
+lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+
 echo "Installing Rustdesk"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.deb
-    sudo apt install -fy ./rustdesk-1.1.9.deb
-elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/1.1.9/rustdesk-1.1.9.rpm
-    sudo yum localinstall ./rustdesk-1.1.9.rpm
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-x86_64.deb
+    sudo apt install -fy ./rustdesk-$lversion-x86_64.deb
+elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "$OS" = "Fedora Linux" ]  || [ "${UPSTREAM_ID}" = "rhel" ] ; then
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-0.x86_64-fedora28-centos8.rpm 
+    sudo yum localinstall ./rustdesk-$lversion-0.x86_64-fedora28-centos8.rpm
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
