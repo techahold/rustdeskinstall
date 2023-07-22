@@ -6,7 +6,6 @@ admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)
 
 ARCH=$(uname -m)
 
-
 # identify OS
 if [ -f /etc/os-release ]; then
     # freedesktop.org and systemd
