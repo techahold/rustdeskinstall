@@ -54,8 +54,8 @@ if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ 
     wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-x86_64.deb
     sudo apt install -fy ./rustdesk-$lversion-x86_64.deb
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "$OS" = "Fedora Linux" ]  || [ "${UPSTREAM_ID}" = "rhel" ] ; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-0.x86_64-fedora28-centos8.rpm 
-    sudo yum localinstall ./rustdesk-$lversion-0.x86_64-fedora28-centos8.rpm
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-0.x86_64.rpm 
+    sudo yum localinstall ./rustdesk-$lversion-0.x86_64.rpm
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
