@@ -53,6 +53,7 @@ echo "Installing Rustdesk"
 if [ "$OS" = "Ubuntu" ] || [ "${UPSTREAM_ID}" = "ubuntu" ]; then
     if [[ "$architecture" != @("x86_64"|"aarch64") ]]; then
         echo "Unsupported Architecture"
+        exit 1
     fi
     sudo add-apt-repository -y universe
     sudo apt install -y libxdo3 curl libva-drm2 libva-x11-2
