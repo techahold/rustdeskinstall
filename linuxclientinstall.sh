@@ -47,8 +47,9 @@ else
 fi
 
 # Install Rustdesk
-lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
-
+if command -v curl > /dev/null; then
+    lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+fi
 echo "Installing Rustdesk"
 if [ "$OS" = "Ubuntu" ] || [ "${UPSTREAM_ID}" = "ubuntu" ]; then
     if [[ "$architecture" != @("x86_64"|"aarch64") ]]; then
