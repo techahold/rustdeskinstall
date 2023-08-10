@@ -2,7 +2,7 @@
 
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c8)
-
+architecture=$(arch)
 
 # identify OS
 if [ -f /etc/os-release ]; then
@@ -50,7 +50,15 @@ fi
 lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
 echo "Installing Rustdesk"
-if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
+if [ "$OS" = "Ubuntu" ] || [ "${UPSTREAM_ID}" = "ubuntu" ]; then
+    if [[ "$architecture" != @("x86_64"|"aarch64") ]]; then
+        echo "Unsupported Architecture"
+    fi
+    sudo add-apt-repository -y universe
+    sudo apt install -y libxdo3 curl libva-drm2 libva-x11-2
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-$architecture.deb
+    sudo apt install -fy ./rustdesk-$lversion-$architecture.deb
+elif [ "${ID}" = "debian" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "debian" ]; then
     wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-x86_64.deb
     sudo apt install -fy ./rustdesk-$lversion-x86_64.deb
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "$OS" = "Fedora Linux" ]  || [ "${UPSTREAM_ID}" = "rhel" ] ; then
