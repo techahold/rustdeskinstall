@@ -55,8 +55,10 @@ if [ "$OS" = "Ubuntu" ] || [ "${UPSTREAM_ID}" = "ubuntu" ]; then
         echo "Unsupported Architecture"
         exit 1
     fi
-    sudo add-apt-repository -y universe
-    sudo apt install -y libxdo3 curl libva-drm2 libva-x11-2
+    if [ "$architecture" = "aarch64" ]; then
+        sudo add-apt-repository -y universe
+        sudo apt install -y libxdo3 curl libva-drm2 libva-x11-2
+    fi
     wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-$architecture.deb
     sudo apt install -fy ./rustdesk-$lversion-$architecture.deb
 elif [ "${ID}" = "debian" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "debian" ]; then
