@@ -3,6 +3,7 @@
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c8)
 architecture=$(arch)
+bpwd=$(pwd)
 
 # identify OS
 if [ -f /etc/os-release ]; then
@@ -63,14 +64,14 @@ if [ "$OS" = "Ubuntu" ] || [ "${UPSTREAM_ID}" = "ubuntu" ]; then
             lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
         fi
     fi
-    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-$architecture.deb
-    sudo apt install -fy ./rustdesk-$lversion-$architecture.deb
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-$architecture.deb --output-document="$bpwd/rustdesk-$lversion-$architecture.deb"
+    sudo apt install -fy $bpwd/rustdesk-$lversion-$architecture.deb
 elif [ "${ID}" = "debian" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "debian" ]; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-x86_64.deb
-    sudo apt install -fy ./rustdesk-$lversion-x86_64.deb
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-x86_64.deb --output-document="$bpwd/rustdesk-$lversion-x86_64.deb"
+    sudo apt install -fy $bpwd/rustdesk-$lversion-x86_64.deb 
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "$OS" = "Fedora Linux" ]  || [ "${UPSTREAM_ID}" = "rhel" ] ; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-0.x86_64.rpm 
-    sudo yum localinstall ./rustdesk-$lversion-0.x86_64.rpm
+    wget https://github.com/rustdesk/rustdesk/releases/download/$lversion/rustdesk-$lversion-0.x86_64.rpm --output-document="$bpwd/rustdesk-$lversion-0.x86_64.rpm"
+    sudo yum localinstall $bpwd/rustdesk-$lversion-0.x86_64.rpm
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
@@ -78,7 +79,8 @@ else
     # if they say no, exit the script
     exit 1
 fi
-
+# Sleeping to let the package manager finish installation.  If this does not complete before trying to run rustdesk, it can cause a panick citing an inability to find the files.
+sleep 5
 rustdesk --password ${admintoken}
 sudo pkill -f "rustdesk"
 
