@@ -68,10 +68,10 @@ Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $rustdesk_pw
 net start rustdesk > null
 
 cd $env:ProgramFiles\RustDesk\
-$rustdesk_id = (.\RustDesk.exe --get-id | more)
+$rustdesk_id = (.\RustDesk.exe --get-id | out-host)
 
-Write-Output "$rustdesk_id"
-Write-Output "$rustdesk_pw"
+Write-Output "RustDesk ID is: $rustdesk_id"
+Write-Output "RustDesk Password is: $rustdesk_pw"
 
 Stop-Process -Name RustDesk -Force > null
 Start-Service -Name RustDesk > null
