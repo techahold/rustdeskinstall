@@ -8,18 +8,6 @@ if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 # Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
-function OutputIDandPW([String]$rustdesk_id, [String]$rustdesk_pw) {
-  Write-Output("######################################################")
-  Write-Output("#                                                    #")
-  Write-Output("# CONNECTION PARAMETERS:                             #")
-  Write-Output("#                                                    #")
-  Write-Output("######################################################")
-  Write-Output("")
-  Write-Output("  RustDesk-ID:       $rustdesk_id")
-  Write-Output("  RustDesk-Password: $rustdesk_pw")
-  Write-Output("")
-}
-
 If (!(Test-Path $env:Temp)) {
   New-Item -ItemType Directory -Force -Path $env:Temp > null
 }
