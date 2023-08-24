@@ -26,40 +26,43 @@ If (!(Test-Path $env:Temp)) {
 
 If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
 
-  cd $env:Temp
+$ErrorActionPreference= 'silentlycontinue'
 
-  Invoke-WebRequest https://github.com/rustdesk/rustdesk/releases/download/1.2.0/rustdesk-1.2.0-x86_64.exe -Outfile rustdesk.exe
-
-  Start-Process "rustdesk.exe" -argumentlist "--silent-install" -wait
-
-  # Cleanup Tempfiles
-  cd $env:Temp
-  Remove-Item $env:Temp\rustdesk.exe -Recurse > null
+If (!(Test-Path c:\Temp)) {
+  New-Item -ItemType Directory -Force -Path c:\Temp > null
 }
 
-# Write config
-$RustDesk2_toml = @"
-rendezvous_server = 'wanipreg'
-nat_type = 1
-serial = 0
+cd c:\Temp
 
-[options]
-custom-rendezvous-server = 'wanipreg'
-key =  'keyreg'
-relay-server = 'wanipreg'
-api-server = 'https://wanipreg'
-enable-audio = 'N'
-"@
+powershell Invoke-WebRequest "https://github.com/rustdesk/rustdesk/releases/download/1.2.2/rustdesk-1.2.2-x86_64.exe" -Outfile "rustdesk.exe"
+Start-Process .\rustdesk.exe --silent-install -wait
 
-If (!(Test-Path $env:AppData\RustDesk\config\RustDesk2.toml)) {
-  New-Item $env:AppData\RustDesk\config\RustDesk2.toml > null
+$ServiceName = 'Rustdesk'
+$arrService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+
+if ($arrService -eq $null)
+{
+    Start-Sleep -seconds 20
 }
-Set-Content $env:AppData\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
 
-If (!(Test-Path $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml)) {
-  New-Item $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml > null
+while ($arrService.Status -ne 'Running')
+{
+    Start-Service $ServiceName
+    Start-Sleep -seconds 5
+    $arrService.Refresh()
 }
-Set-Content $env:WinDir\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml $RustDesk2_toml > null
+
+net stop rustdesk
+
+$username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
+Remove-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
+New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
+Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'IPADDRESS' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'IPADDRESS'`nkey = 'KEY='`nrelay-server = 'IPADDRESS'`napi-server = 'https://IPADDRESS'"
+Remove-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
+New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
+Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'IPADDRESS' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'IPADDRESS'`nkey = 'KEY='`nrelay-server = 'IPADDRESS'`napi-server = 'https://IPADDRESS'"
+
+net start rustdesk
 
 $random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
 Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe"  -argumentlist "--password $random_pass" -wait
@@ -73,9 +76,14 @@ stop-process -ProcessName rustdesk -Force
 
 $rustdesk_pw = (-join ((65..90) + (97..122) | Get-Random -Count 12 | % {[char]$_})) 
 Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $rustdesk_pw" -wait
-Write-Output "$rustdesk_pw"
 
 net start rustdesk > null
+
+cd $env:ProgramFiles\RustDesk\
+$rustdesk_id = (.\RustDesk.exe --get-id | more)
+
+Write-Output "$rustdesk_id"
+Write-Output "$rustdesk_pw"
 
 Stop-Process -Name RustDesk -Force > null
 Start-Service -Name RustDesk > null
