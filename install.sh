@@ -1,5 +1,38 @@
 #!/bin/bash
 
+# Get user options
+while getopts i:-: option; do
+    case "${option}" in
+        -)
+            case "${OPTARG}" in
+                help)
+                    help="true";;
+                resolveip)
+                    resolveip="true";;
+                resolvedns)
+                    val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                    resolvedns=${val};;
+                install-http)
+                    http="true";;
+                skip-http)
+                    http="false";;
+            esac;;
+        i) resolveip="true";;
+    esac
+done
+
+function displayhelp() {
+    if [[ ! -z $help ]]; then
+        echo 'usage: install.sh --resolveip --resolvedns "fqdn"'
+        echo "options:"
+        echo "--resolveip    Use IP for server name.  Cannot use in combination with --resolvedns or -d"
+        echo '--resolvedns "fqdn"    Use FQDN for server name.  Cannot use in combination with --resolveip or -i'
+        echo "--install-http    Install http server to host installation scripts.  Cannot use in combination with --skip-http or -n"
+        echo "--skip-http    Skip installation of http server.  Cannot use in combination with --install-http or -h"
+        exit 0
+    fi
+}
+displayhelp
 # Get Username
 uname=$(whoami)
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)
@@ -93,28 +126,41 @@ else
 fi
 
 # Choice for DNS or IP
-PS3='Choose your preferred option, IP or DNS/Domain:'
-WAN=("IP" "DNS/Domain")
-select WANOPT in "${WAN[@]}"; do
-case $WANOPT in
-"IP")
-wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
-break
-;;
+if [[ -z "$resolveip" && -z "$resolvedns" ]]; then
+    PS3='Choose your preferred option, IP or DNS/Domain:'
+    WAN=("IP" "DNS/Domain")
+    select WANOPT in "${WAN[@]}"; do
+    case $WANOPT in
+    "IP")
+    wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
+    break
+    ;;
 
-"DNS/Domain")
-echo -ne "Enter your preferred domain/dns address ${NC}: "
-read wanip
-#check wanip is valid domain
-if ! [[ $wanip =~ ^[a-zA-Z0-9]+([a-zA-Z0-9.-]*[a-zA-Z0-9]+)?$ ]]; then
-    echo -e "${RED}Invalid domain/dns address${NC}"
+    "DNS/Domain")
+    echo -ne "Enter your preferred domain/dns address ${NC}: "
+    read wanip
+    #check wanip is valid domain
+    if ! [[ $wanip =~ ^[a-zA-Z0-9]+([a-zA-Z0-9.-]*[a-zA-Z0-9]+)?$ ]]; then
+        echo -e "${RED}Invalid domain/dns address${NC}"
+        exit 1
+    fi
+    break
+    ;;
+    *) echo "invalid option $REPLY";;
+    esac
+    done
+elif [[ ! -z "$resolveip" && ! -z "$resolvedns" ]]; then
+    echo -e "\nERROR: You cannot use both --resolveip & --resolvedns options simultaneously"
     exit 1
+elif [[ ! -z "$resolveip" && -z "$resolvedns" ]]; then
+    wanip=$(dig @resolver4.opendns.com myip.opendns.com +short)
+elif [[ -z "$resolveip" && ! -z "$resolvedns" ]]; then
+    wanip="$resolvedns"
+    if ! [[ $wanip =~ ^[a-zA-Z0-9]+([a-zA-Z0-9.-]*[a-zA-Z0-9]+)?$ ]]; then
+        echo -e "${RED}Invalid domain/dns address${NC}"
+        exit 1
+    fi
 fi
-break
-;;
-*) echo "invalid option $REPLY";;
-esac
-done
 
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
@@ -225,70 +271,63 @@ rm rustdesk-server-linux-arm64v8.zip
 rm -rf arm64v8
 fi
 
+function setuphttp () {
+    # Create windows install script
+    wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
+    sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
+    sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
 
-# Choice for Extras installed
-PS3='Please choose if you want to download configs and install HTTP server:'
-EXTRA=("Yes" "No")
-select EXTRAOPT in "${EXTRA[@]}"; do
-case $EXTRAOPT in
-"Yes")
+    # Create linux install script
+    wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
+    sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
+    sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
 
-# Create windows install script
-wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
-sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
-sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
+    # Download and install gohttpserver
+    # Make Folder /opt/gohttp/
+    if [ ! -d "/opt/gohttp" ]; then
+        echo "Creating /opt/gohttp"
+        sudo mkdir -p /opt/gohttp/
+        sudo mkdir -p /opt/gohttp/public
+    fi
+    sudo chown "${uname}" -R /opt/gohttp
+    cd /opt/gohttp
+    GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
-# Create linux install script
-wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
-sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
-sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
+    echo "Installing Go HTTP Server"
+    if [ "${ARCH}" = "x86_64" ] ; then
+    wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
+    tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
+    elif [ "${ARCH}" =  "aarch64" ] ; then
+    wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
+    tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
+    elif [ "${ARCH}" = "armv7l" ] ; then
+    echo "Go HTTP Server not supported on 32bit ARM devices"
+    echo -e "Your IP/DNS Address is ${wanip}"
+    echo -e "Your public key is ${key}"
+    exit 1
+    fi
 
-# Download and install gohttpserver
-# Make Folder /opt/gohttp/
-if [ ! -d "/opt/gohttp" ]; then
-    echo "Creating /opt/gohttp"
-    sudo mkdir -p /opt/gohttp/
-	sudo mkdir -p /opt/gohttp/public
-fi
-sudo chown "${uname}" -R /opt/gohttp
-cd /opt/gohttp
-GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
+    # Copy Rustdesk install scripts to folder
+    mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
+    mv /opt/rustdesk/linuxclientinstall.sh /opt/gohttp/public/
 
-echo "Installing Go HTTP Server"
-if [ "${ARCH}" = "x86_64" ] ; then
-wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz"
-tar -xf  gohttpserver_${GOHTTPLATEST}_linux_amd64.tar.gz 
-elif [ "${ARCH}" =  "aarch64" ] ; then
-wget "https://github.com/codeskyblue/gohttpserver/releases/download/${GOHTTPLATEST}/gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz"
-tar -xf  gohttpserver_${GOHTTPLATEST}_linux_arm64.tar.gz
-elif [ "${ARCH}" = "armv7l" ] ; then
-echo "Go HTTP Server not supported on 32bit ARM devices"
-echo -e "Your IP/DNS Address is ${wanip}"
-echo -e "Your public key is ${key}"
-exit 1
-fi
+    # Make gohttp log folders
+    if [ ! -d "/var/log/gohttp" ]; then
+        echo "Creating /var/log/gohttp"
+        sudo mkdir -p /var/log/gohttp/
+    fi
+    sudo chown "${uname}" -R /var/log/gohttp/
 
-# Copy Rustdesk install scripts to folder
-mv /opt/rustdesk/WindowsAgentAIOInstall.ps1 /opt/gohttp/public/
-mv /opt/rustdesk/linuxclientinstall.sh /opt/gohttp/public/
-
-# Make gohttp log folders
-if [ ! -d "/var/log/gohttp" ]; then
-    echo "Creating /var/log/gohttp"
-    sudo mkdir -p /var/log/gohttp/
-fi
-sudo chown "${uname}" -R /var/log/gohttp/
-
-echo "Tidying up Go HTTP Server Install"
-if [ "${ARCH}" = "x86_64" ] ; then
-rm gohttpserver_"${GOHTTPLATEST}"_linux_amd64.tar.gz
-elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ]; then
-rm gohttpserver_"${GOHTTPLATEST}"_linux_arm64.tar.gz
-fi
+    echo "Tidying up Go HTTP Server Install"
+    if [ "${ARCH}" = "x86_64" ] ; then
+    rm gohttpserver_"${GOHTTPLATEST}"_linux_amd64.tar.gz
+    elif [ "${ARCH}" = "armv7l" ] || [ "${ARCH}" =  "aarch64" ]; then
+    rm gohttpserver_"${GOHTTPLATEST}"_linux_arm64.tar.gz
+    fi
 
 
-# Setup Systemd to launch Go HTTP Server
-gohttpserver="$(cat << EOF
+    # Setup Systemd to launch Go HTTP Server
+    gohttpserver="$(cat << EOF
 [Unit]
 Description=Go HTTP Server
 [Service]
@@ -307,46 +346,64 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 )"
-echo "${gohttpserver}" | sudo tee /etc/systemd/system/gohttpserver.service > /dev/null
-sudo systemctl daemon-reload
-sudo systemctl enable gohttpserver.service
-sudo systemctl start gohttpserver.service
+    echo "${gohttpserver}" | sudo tee /etc/systemd/system/gohttpserver.service > /dev/null
+    sudo systemctl daemon-reload
+    sudo systemctl enable gohttpserver.service
+    sudo systemctl start gohttpserver.service
 
 
-echo -e "Your IP/DNS Address is ${wanip}"
-echo -e "Your public key is ${key}"
-echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
-echo -e "You can access your install scripts for clients by going to http://${wanip}:8000"
-echo -e "Username is admin and password is ${admintoken}"
+    echo -e "Your IP/DNS Address is ${wanip}"
+    echo -e "Your public key is ${key}"
+    echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
+    echo -e "You can access your install scripts for clients by going to http://${wanip}:8000"
+    echo -e "Username is admin and password is ${admintoken}"
+    if [[ -z "$http" ]]; then
+        echo "Press any key to finish install"
+        while [ true ] ; do
+        read -t 3 -n 1
+        if [ $? = 0 ] ; then
+        exit ;
+        else
+        echo "waiting for the keypress"
+        fi
+        done
+        break
+    fi
+}
 
-echo "Press any key to finish install"
-while [ true ] ; do
-read -t 3 -n 1
-if [ $? = 0 ] ; then
-exit ;
-else
-echo "waiting for the keypress"
+# Choice for Extras installed
+if [[ -z "$http" ]]; then
+    PS3='Please choose if you want to download configs and install HTTP server:'
+    EXTRA=("Yes" "No")
+    select EXTRAOPT in "${EXTRA[@]}"; do
+    case $EXTRAOPT in
+    "Yes")
+    setuphttp
+    break
+    ;;
+    "No")
+    echo -e "Your IP/DNS Address is ${wanip}"
+    echo -e "Your public key is ${key}"
+    echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
+
+    echo "Press any key to finish install"
+    while [ true ] ; do
+    read -t 3 -n 1
+    if [ $? = 0 ] ; then
+    exit ;
+    else
+    echo "waiting for the keypress"
+    fi
+    done
+    break
+    ;;
+    *) echo "invalid option $REPLY";;
+    esac
+    done
+elif [ "$http" = "true" ]; then
+    setuphttp
+elif [ "$http" = "false" ]; then
+    echo -e "Your IP/DNS Address is ${wanip}"
+    echo -e "Your public key is ${key}"
+    echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
 fi
-done
-break
-;;
-
-"No")
-echo -e "Your IP/DNS Address is ${wanip}"
-echo -e "Your public key is ${key}"
-echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
-
-echo "Press any key to finish install"
-while [ true ] ; do
-read -t 3 -n 1
-if [ $? = 0 ] ; then
-exit ;
-else
-echo "waiting for the keypress"
-fi
-done
-break
-;;
-*) echo "invalid option $REPLY";;
-esac
-done
