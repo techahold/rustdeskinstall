@@ -4,6 +4,8 @@ For Rustdesk visit https://rustdesk.com
 
 You can use Hetzner to test this with a $20 credit using this referal code https://hetzner.cloud/?ref=p6iUr7jEXmoB
 
+We provide professional hosting and support for RustDesk OSS and RustDesk Pro, please email hello@techahold.com if you need assistance.
+
 # How to Install the server
 Please setup your firewall on your server prior to running the script.
 
