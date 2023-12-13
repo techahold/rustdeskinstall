@@ -47,6 +47,9 @@ else
     VER=$(uname -r)
 fi
 
+#Install CURL, not install default
+apt install curl -y
+
 # Install Rustdesk
 if command -v curl > /dev/null; then
     lversion=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
