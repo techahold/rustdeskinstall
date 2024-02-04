@@ -82,7 +82,7 @@ else
 fi
 
 
-# output ebugging info if $DEBUG set
+# output debugging info if $DEBUG set
 if [ "$DEBUG" = "true" ]; then
     echo "OS: $OS"
     echo "VER: $VER"
