@@ -271,16 +271,21 @@ rm rustdesk-server-linux-arm64v8.zip
 rm -rf arm64v8
 fi
 
+echo "Grabbing installers"
+string="{\"host\":\"${wanip}\",\"key\":\"${key}\",\"api\":\"https://${wanip}\"}"
+string64=$(echo -n "$string" | base64 -w 0 | tr -d '=')
+string64rev=$(echo -n "$string64" | rev)
+
+echo "$string64rev"
+
 function setuphttp () {
     # Create windows install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
-    sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
-    sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
+    sudo sed -i "s|secure-string|${string64rev}|g" WindowsAgentAIOInstall.ps1
 
     # Create linux install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
-    sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
-    sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
+    sudo sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
 
     # Download and install gohttpserver
     # Make Folder /opt/gohttp/
