@@ -271,16 +271,21 @@ rm rustdesk-server-linux-arm64v8.zip
 rm -rf arm64v8
 fi
 
+echo "Grabbing installers"
+string="{\"host\":\"${wanip}\",\"key\":\"${key}\",\"api\":\"https://${wanip}\"}"
+string64=$(echo -n "$string" | base64 -w 0 | tr -d '=')
+string64rev=$(echo -n "$string64" | rev)
+
+echo "$string64rev"
+
 function setuphttp () {
     # Create windows install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
-    sudo sed -i "s|wanipreg|${wanip}|g" WindowsAgentAIOInstall.ps1
-    sudo sed -i "s|keyreg|${key}|g" WindowsAgentAIOInstall.ps1
+    sudo sed -i "s|secure-string|${string64rev}|g" WindowsAgentAIOInstall.ps1
 
     # Create linux install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
-    sudo sed -i "s|wanipreg|${wanip}|g" linuxclientinstall.sh
-    sudo sed -i "s|keyreg|${key}|g" linuxclientinstall.sh
+    sudo sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
 
     # Download and install gohttpserver
     # Make Folder /opt/gohttp/
@@ -386,6 +391,8 @@ if [[ -z "$http" ]]; then
     echo -e "Your public key is ${key}"
     echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
 
+    echo - e "You can get a free API with Addressbook etc via https://github.com/infiniteremote/installer"
+
     echo "Press any key to finish install"
     while [ true ] ; do
     read -t 3 -n 1
@@ -406,4 +413,6 @@ elif [ "$http" = "false" ]; then
     echo -e "Your IP/DNS Address is ${wanip}"
     echo -e "Your public key is ${key}"
     echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
+
+    echo - e "You can get a free API with Addressbook etc via https://github.com/infiniteremote/installer"
 fi
