@@ -1,26 +1,35 @@
 $ErrorActionPreference= 'silentlycontinue'
-#Run as administrator and stays in the current directory
+
+# Assign the value random password to the password variable
+$rustdesk_pw=(-join ((65..90) + (97..122) | Get-Random -Count 12 | % {[char]$_}))
+
+# Get your config string from your Web portal and Fill Below
+$rustdesk_cfg="secure-string"
+
+################################### Please Do Not Edit Below This Line #########################################
+
+# Run as administrator and stays in the current directory
 if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     if ([int](Get-CimInstance -Class Win32_OperatingSystem | Select-Object -ExpandProperty BuildNumber) -ge 6000) {
         Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$pwd'; & '$PSCommandPath';`"";
         Exit;
     }
 }
-# Replace wanipreg and keyreg with the relevant info for your install. IE wanipreg becomes your rustdesk server IP or DNS and keyreg becomes your public key.
 
-If (!(Test-Path $env:Temp)) {
-  New-Item -ItemType Directory -Force -Path $env:Temp > null
+$rdver = ((Get-ItemProperty  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk\").Version)
+
+if($rdver -eq "1.2.2")
+{
+write-output "RustDesk $rdver is the newest version"
+
+exit
 }
 
-If (!(Test-Path "$env:ProgramFiles\Rustdesk\RustDesk.exe")) {
-
-$ErrorActionPreference= 'silentlycontinue'
-
-If (!(Test-Path c:\Temp)) {
-  New-Item -ItemType Directory -Force -Path c:\Temp > null
+If (!(Test-Path C:\Temp)) {
+  New-Item -ItemType Directory -Force -Path C:\Temp > null
 }
 
-cd c:\Temp
+cd C:\Temp
 
 powershell Invoke-WebRequest "https://github.com/rustdesk/rustdesk/releases/download/1.2.2/rustdesk-1.2.2-x86_64.exe" -Outfile "rustdesk.exe"
 Start-Process .\rustdesk.exe --silent-install -wait
@@ -30,6 +39,9 @@ $arrService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
 
 if ($arrService -eq $null)
 {
+    Write-Output "Installing service"
+    cd $env:ProgramFiles\RustDesk
+    Start-Process .\rustdesk.exe --install-service -wait -Verbose
     Start-Sleep -seconds 20
 }
 
@@ -40,39 +52,17 @@ while ($arrService.Status -ne 'Running')
     $arrService.Refresh()
 }
 
-net stop rustdesk
-
-$username = ((Get-WMIObject -ClassName Win32_ComputerSystem).Username).Split('\')[1]
-Remove-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
-New-Item C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Users\$username\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
-Remove-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-New-Item C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml
-Set-Content C:\Windows\ServiceProfiles\LocalService\AppData\Roaming\RustDesk\config\RustDesk2.toml "rendezvous_server = 'wanipreg' `nnat_type = 1`nserial = 0`n`n[options]`ncustom-rendezvous-server = 'wanipreg'`nkey = 'keyreg'`nrelay-server = 'wanipreg'`napi-server = 'https://wanipreg'"
-
-net start rustdesk
-
-$random_pass = (-join ((65..90) + (97..122) | Get-Random -Count 8 | % {[char]$_}))
-Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe"  -argumentlist "--password $random_pass" -wait
-
-net stop rustdesk > null
-$ProcessActive = Get-Process rustdesk -ErrorAction SilentlyContinue
-if($ProcessActive -ne $null)
-{
-stop-process -ProcessName rustdesk -Force
-}
-
-$rustdesk_pw = (-join ((65..90) + (97..122) | Get-Random -Count 12 | % {[char]$_})) 
-Start-Process "$env:ProgramFiles\RustDesk\RustDesk.exe" "--password $rustdesk_pw" -wait
-
-net start rustdesk > null
-
 cd $env:ProgramFiles\RustDesk\
-$rustdesk_id = (.\RustDesk.exe --get-id | out-host)
+.\RustDesk.exe --get-id | Write-Output -OutVariable rustdesk_id
 
-Write-Output "RustDesk ID is: $rustdesk_id"
-Write-Output "RustDesk Password is: $rustdesk_pw"
+.\RustDesk.exe --config $rustdesk_cfg
 
-Stop-Process -Name RustDesk -Force > null
-Start-Service -Name RustDesk > null
-}
+.\RustDesk.exe--password $rustdesk_pw
+
+Write-Output "..............................................."
+# Show the value of the ID Variable
+Write-Output "RustDesk ID: $rustdesk_id"
+
+# Show the value of the Password Variable
+Write-Output "Password: $rustdesk_pw"
+Write-Output "..............................................."
