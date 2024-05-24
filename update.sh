@@ -125,8 +125,6 @@ while ! [[ $CHECK_RUSTDESK_READY ]]; do
   sleep 3
 done
 
-rm rustdesk-server-linux-amd64.zip
-
 # chk if gotthp exists
 
 if ! [ -e /opt/gohttp ]; then
