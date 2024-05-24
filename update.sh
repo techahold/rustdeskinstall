@@ -113,7 +113,7 @@ wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/
 unzip -j -o  rustdesk-server-linux-armv7.zip  "armv7/*" -d "/opt/rustdesk/"
 elif [ "${ARCH}" = "aarch64" ] ; then
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-arm64v8.zip"
-unzip -j -o  rustdesk-server-linux-arm64v8.zip  "armv7/*" -d "/opt/rustdesk/"
+unzip -j -o  rustdesk-server-linux-arm64v8.zip  "arm64v8/*" -d "/opt/rustdesk/"
 fi
 
 sudo systemctl start rustdesksignal.service
