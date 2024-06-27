@@ -127,7 +127,7 @@ fi
 
 # Choice for DNS or IP
 if [[ -z "$resolveip" && -z "$resolvedns" ]]; then
-    PS3='Choose your preferred option, IP or DNS/Domain:'
+    PS3='Choose your preferred connection method: auto-resolve current WAN IP or enter your DNS/Domain:'
     WAN=("IP" "DNS/Domain")
     select WANOPT in "${WAN[@]}"; do
     case $WANOPT in
