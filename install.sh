@@ -35,6 +35,7 @@ function displayhelp() {
 displayhelp
 # Get Username
 uname=$(whoami)
+gname=$(id -gn ${uname})
 admintoken=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c16)
 
 ARCH=$(uname -m)
@@ -210,7 +211,7 @@ LimitNOFILE=1000000
 ExecStart=/opt/rustdesk/hbbs -k _
 WorkingDirectory=/opt/rustdesk/
 User=${uname}
-Group=${uname}
+Group=${gname}
 Restart=always
 StandardOutput=append:/var/log/rustdesk/signalserver.log
 StandardError=append:/var/log/rustdesk/signalserver.error
@@ -235,7 +236,7 @@ LimitNOFILE=1000000
 ExecStart=/opt/rustdesk/hbbr -k _
 WorkingDirectory=/opt/rustdesk/
 User=${uname}
-Group=${uname}
+Group=${gname}
 Restart=always
 StandardOutput=append:/var/log/rustdesk/relayserver.log
 StandardError=append:/var/log/rustdesk/relayserver.error
@@ -341,7 +342,7 @@ LimitNOFILE=1000000
 ExecStart=/opt/gohttp/gohttpserver -r ./public --port 8000 --auth-type http --auth-http admin:${admintoken}
 WorkingDirectory=/opt/gohttp/
 User=${uname}
-Group=${uname}
+Group=${gname}
 Restart=always
 StandardOutput=append:/var/log/gohttp/gohttpserver.log
 StandardError=append:/var/log/gohttp/gohttpserver.error
