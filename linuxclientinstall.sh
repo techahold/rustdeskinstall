@@ -55,18 +55,21 @@ else
     VER=$(uname -r)
 fi
 
+# Checks the latest version of RustDesk
+RDLATEST=$(curl https://api.github.com/repos/rustdesk/rustdesk/releases/latest -s | grep "tag_name" | awk -F'"' '{print $4}')
+
 # Install RustDesk
 
 echo "Installing RustDesk"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ] || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/1.2.3-2/rustdesk-1.2.3-2-x86_64.deb
-    apt-get install -fy ./rustdesk-1.2.3-2-x86_64.deb >/dev/null
+    wget https://github.com/rustdesk/rustdesk/releases/download/${RDLATEST}/rustdesk-${RDLATEST}-x86_64.deb
+    apt-get install -fy ./rustdesk-${RDLATEST}-x86_64.deb >/dev/null
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ] || [ "$OS" = "Fedora Linux" ] || [ "${UPSTREAM_ID}" = "rhel" ]; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/1.2.3-2/rustdesk-1.2.3-2.x86_64.rpm
-    yum localinstall ./rustdesk-1.2.3-2.x86_64.rpm -y >/dev/null
+    wget https://github.com/rustdesk/rustdesk/releases/download/${RDLATEST}/rustdesk-${RDLATEST}.x86_64.rpm
+    yum localinstall ./rustdesk-${RDLATEST}.x86_64.rpm -y >/dev/null
 elif [ "${UPSTREAM_ID}" = "suse" ]; then
-    wget https://github.com/rustdesk/rustdesk/releases/download/1.2.3-2/rustdesk-1.2.3-2.x86_64-suse.rpm
-    zypper -n install --allow-unsigned-rpm ./rustdesk-1.2.3-2.x86_64-suse.rpm >/dev/null
+    wget https://github.com/rustdesk/rustdesk/releases/download/${RDLATEST}/rustdesk-${RDLATEST}.x86_64-suse.rpm
+    zypper -n install --allow-unsigned-rpm ./rustdesk-${RDLATEST}.x86_64-suse.rpm >/dev/null
 else
     echo "Unsupported OS"
     # here you could ask the user for permission to try and install anyway
@@ -85,7 +88,8 @@ rustdesk --config $rustdesk_cfg
 
 systemctl restart rustdesk
 
-
+echo "All done! Please double check the Network settings tab in RustDesk."
+echo ""
 echo "..............................................."
 # Check if the rustdesk_id is not empty
 if [ -n "$rustdesk_id" ]; then
