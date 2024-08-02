@@ -273,7 +273,7 @@ rm -rf arm64v8
 fi
 
 echo "Grabbing installers"
-string="{\"host\":\"${wanip}\",\"key\":\"${key}\",\"api\":\"https://${wanip}\"}"
+string="{\"host\":\"${wanip}\",\"relay\":\"${wanip}\",\"key\":\"${key}\",\"api\":\"https://${wanip}\"}"
 string64=$(echo -n "$string" | base64 -w 0 | tr -d '=')
 string64rev=$(echo -n "$string64" | rev)
 
