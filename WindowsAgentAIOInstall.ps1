@@ -16,33 +16,61 @@ if (-Not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     }
 }
 
+# Checks for the latest version of RustDesk
+$url = 'https://www.github.com//rustdesk/rustdesk/releases/latest'
+$request = [System.Net.WebRequest]::Create($url)
+$response = $request.GetResponse()
+$realTagUrl = $response.ResponseUri.OriginalString
+$RDLATEST = $realTagUrl.split('/')[-1].Trim('v')
+echo "RustDesk $RDLATEST is the latest version."
+
+# Checks the version of RustDesk installed.
 $rdver = ((Get-ItemProperty  "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk\").Version)
 
-if($rdver -eq "1.2.2")
-{
-write-output "RustDesk $rdver is the newest version"
+# Skips to inputting the configuration if the latest version of RustDesk is already installed.
+if($rdver -eq "$RDLATEST") {
+echo "RustDesk $rdver is already installed."
+cd $env:ProgramFiles\RustDesk
+echo "Inputting configuration now."
+.\rustdesk.exe --config $rustdesk_cfg
+.\rustdesk.exe --password $rustdesk_pw
+$rustdesk_id = .\rustdesk.exe --get-id | Write-Output -OutVariable rustdesk_id
+echo "All done! Please double check the Network settings tab in RustDesk."
+echo ""
+echo "..............................................."
+# Show the value of the ID Variable
+echo "RustDesk ID: $rustdesk_id"
 
+# Show the value of the Password Variable
+echo "Password: $rustdesk_pw"
+echo "..............................................."
+echo ""
+echo "Press Enter to open RustDesk."
+pause
+.\rustdesk.exe
 exit
 }
 
-If (!(Test-Path C:\Temp)) {
+if (!(Test-Path C:\Temp)) {
   New-Item -ItemType Directory -Force -Path C:\Temp > null
 }
 
 cd C:\Temp
+echo "Downloading RustDesk version $RDLATEST."
+powershell Invoke-WebRequest "https://github.com/rustdesk/rustdesk/releases/download/$RDLATEST/rustdesk-$RDLATEST-x86_64.exe" -Outfile "rustdesk.exe"
+echo "Installing RustDesk version $RDLATEST."
+Start-Process .\rustdesk.exe --silent-install
+Start-Sleep -Seconds 10
 
-powershell Invoke-WebRequest "https://github.com/rustdesk/rustdesk/releases/download/1.2.6/rustdesk-1.2.6-x86_64.exe" -Outfile "rustdesk.exe"
-Start-Process .\rustdesk.exe --silent-install -wait
-
-$ServiceName = 'Rustdesk'
+$ServiceName = 'rustdesk'
 $arrService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
 
 if ($arrService -eq $null)
 {
-    Write-Output "Installing service"
+    echo "Installing service."
     cd $env:ProgramFiles\RustDesk
     Start-Process .\rustdesk.exe --install-service -wait -Verbose
-    Start-Sleep -seconds 20
+    Start-Sleep -Seconds 20
 }
 
 while ($arrService.Status -ne 'Running')
@@ -52,17 +80,25 @@ while ($arrService.Status -ne 'Running')
     $arrService.Refresh()
 }
 
-cd $env:ProgramFiles\RustDesk\
-.\RustDesk.exe --get-id | Write-Output -OutVariable rustdesk_id
+# Waits for installation to complete before proceeding.
+echo "Please wait a few seconds."
+Start-Sleep -Seconds 10
 
-.\RustDesk.exe --config $rustdesk_cfg
-
-.\RustDesk.exe --password $rustdesk_pw
-
-Write-Output "..............................................."
+cd $env:ProgramFiles\RustDesk
+echo "Inputting configuration now."
+.\rustdesk.exe --config $rustdesk_cfg
+.\rustdesk.exe --password $rustdesk_pw
+$rustdesk_id = .\rustdesk.exe --get-id | Write-Output -OutVariable rustdesk_id
+echo "All done! Please double check the Network settings tab in RustDesk."
+echo ""
+echo "..............................................."
 # Show the value of the ID Variable
-Write-Output "RustDesk ID: $rustdesk_id"
+echo "RustDesk ID: $rustdesk_id"
 
 # Show the value of the Password Variable
-Write-Output "Password: $rustdesk_pw"
-Write-Output "..............................................."
+echo "Password: $rustdesk_pw"
+echo "..............................................."
+echo ""
+echo "Press Enter to open RustDesk."
+pause
+.\rustdesk.exe
