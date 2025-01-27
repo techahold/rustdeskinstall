@@ -104,6 +104,9 @@ fi
 
 cd /opt/rustdesk/
 
+# remove any previous zip files
+rm *.zip
+
 echo "Upgrading Rustdesk Server"
 if [ "${ARCH}" = "x86_64" ] ; then
 wget "https://github.com/rustdesk/rustdesk-server/releases/download/${RDLATEST}/rustdesk-server-linux-amd64.zip"
