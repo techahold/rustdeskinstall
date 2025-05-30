@@ -16,6 +16,8 @@ while getopts i:-: option; do
                     http="true";;
                 skip-http)
                     http="false";;
+                no-sudo)
+                    usesudo="false";;
             esac;;
         i) resolveip="true";;
     esac
@@ -29,10 +31,31 @@ function displayhelp() {
         echo '--resolvedns "fqdn"    Use FQDN for server name.  Cannot use in combination with --resolveip or -i'
         echo "--install-http    Install http server to host installation scripts.  Cannot use in combination with --skip-http or -n"
         echo "--skip-http    Skip installation of http server.  Cannot use in combination with --install-http or -h"
+        echo "--no-sudo    Do not use sudo for commands. If sudo is not installed, it will be ignored automatically."
         exit 0
     fi
 }
 displayhelp
+
+# Default: use sudo unless --no-sudo is specified
+usesudo="${usesudo:-true}"
+
+# Check if sudo is available and wanted
+if [[ "$usesudo" == "true" ]]; then
+    if command -v sudo &>/dev/null; then
+        SUDO="sudo"
+        echo "sudo detected and will be used."
+    else
+        echo "sudo not found. Switching to no-sudo mode."
+        SUDO=""
+        echo "Some installation steps may fail if run without root privileges."
+    fi
+else
+    SUDO=""
+    echo "Running in no-sudo mode."
+    echo "Some installation steps may fail if run without root privileges."
+fi
+
 # Get Username
 uname=$(whoami)
 gname=$(id -gn ${uname})
@@ -100,17 +123,17 @@ PREREQARCH="bind"
 
 echo "Installing prerequisites"
 if [ "${ID}" = "debian" ] || [ "$OS" = "Ubuntu" ] || [ "$OS" = "Debian" ]  || [ "${UPSTREAM_ID}" = "ubuntu" ] || [ "${UPSTREAM_ID}" = "debian" ]; then
-    sudo apt-get update
-    sudo apt-get install -y  ${PREREQ} ${PREREQDEB} # git
+    $SUDO apt-get update
+    $SUDO apt-get install -y  ${PREREQ} ${PREREQDEB} # git
 elif [ "$OS" = "CentOS" ] || [ "$OS" = "RedHat" ]   || [ "${UPSTREAM_ID}" = "rhel" ] ; then
 # opensuse 15.4 fails to run the relay service and hangs waiting for it
 # needs more work before it can be enabled
 # || [ "${UPSTREAM_ID}" = "suse" ]
-    sudo yum update -y
-    sudo yum install -y  ${PREREQ} ${PREREQRPM} # git
+    $SUDO yum update -y
+    $SUDO yum install -y  ${PREREQ} ${PREREQRPM} # git
 elif [ "${ID}" = "arch" ] || [ "${UPSTREAM_ID}" = "arch" ]; then
-    sudo pacman -Syu
-    sudo pacman -S ${PREREQ} ${PREREQARCH}
+    $SUDO pacman -Syu
+    $SUDO pacman -S ${PREREQ} ${PREREQARCH}
 else
     echo "Unsupported OS"
     # give them the option to continue
@@ -166,9 +189,9 @@ fi
 # Make Folder /opt/rustdesk/
 if [ ! -d "/opt/rustdesk" ]; then
     echo "Creating /opt/rustdesk"
-    sudo mkdir -p /opt/rustdesk/
+    $SUDO mkdir -p /opt/rustdesk/
 fi
-sudo chown "${uname}" -R /opt/rustdesk
+$SUDO chown "${uname}" -R /opt/rustdesk
 cd /opt/rustdesk/ || exit 1
 
 
@@ -197,9 +220,9 @@ chmod +x /opt/rustdesk/hbbr
 # Make Folder /var/log/rustdesk/
 if [ ! -d "/var/log/rustdesk" ]; then
     echo "Creating /var/log/rustdesk"
-    sudo mkdir -p /var/log/rustdesk/
+    $SUDO mkdir -p /var/log/rustdesk/
 fi
-sudo chown "${uname}" -R /var/log/rustdesk/
+$SUDO chown "${uname}" -R /var/log/rustdesk/
 
 # Setup Systemd to launch hbbs
 rustdesksignal="$(cat << EOF
@@ -221,10 +244,10 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 )"
-echo "${rustdesksignal}" | sudo tee /etc/systemd/system/rustdesksignal.service > /dev/null
-sudo systemctl daemon-reload
-sudo systemctl enable rustdesksignal.service
-sudo systemctl start rustdesksignal.service
+echo "${rustdesksignal}" | $SUDO tee /etc/systemd/system/rustdesksignal.service > /dev/null
+$SUDO systemctl daemon-reload
+$SUDO systemctl enable rustdesksignal.service
+$SUDO systemctl start rustdesksignal.service
 
 # Setup Systemd to launch hbbr
 rustdeskrelay="$(cat << EOF
@@ -246,13 +269,13 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 )"
-echo "${rustdeskrelay}" | sudo tee /etc/systemd/system/rustdeskrelay.service > /dev/null
-sudo systemctl daemon-reload
-sudo systemctl enable rustdeskrelay.service
-sudo systemctl start rustdeskrelay.service
+echo "${rustdeskrelay}" | $SUDO tee /etc/systemd/system/rustdeskrelay.service > /dev/null
+$SUDO systemctl daemon-reload
+$SUDO systemctl enable rustdeskrelay.service
+$SUDO systemctl start rustdeskrelay.service
 
 while ! [[ $CHECK_RUSTDESK_READY ]]; do
-  CHECK_RUSTDESK_READY=$(sudo systemctl status rustdeskrelay.service | grep "Active: active (running)")
+  CHECK_RUSTDESK_READY=$($SUDO systemctl status rustdeskrelay.service | grep "Active: active (running)")
   echo -ne "Rustdesk Relay not ready yet...${NC}\n"
   sleep 3
 done
@@ -282,20 +305,20 @@ echo "$string64rev"
 function setuphttp () {
     # Create windows install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/WindowsAgentAIOInstall.ps1
-    sudo sed -i "s|secure-string|${string64rev}|g" WindowsAgentAIOInstall.ps1
+    $SUDO sed -i "s|secure-string|${string64rev}|g" WindowsAgentAIOInstall.ps1
 
     # Create linux install script
     wget https://raw.githubusercontent.com/dinger1986/rustdeskinstall/master/linuxclientinstall.sh
-    sudo sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
+    $SUDO sed -i "s|secure-string|${string64rev}|g" linuxclientinstall.sh
 
     # Download and install gohttpserver
     # Make Folder /opt/gohttp/
     if [ ! -d "/opt/gohttp" ]; then
         echo "Creating /opt/gohttp"
-        sudo mkdir -p /opt/gohttp/
-        sudo mkdir -p /opt/gohttp/public
+        $SUDO mkdir -p /opt/gohttp/
+        $SUDO mkdir -p /opt/gohttp/public
     fi
-    sudo chown "${uname}" -R /opt/gohttp
+    $SUDO chown "${uname}" -R /opt/gohttp
     cd /opt/gohttp
     GOHTTPLATEST=$(curl https://api.github.com/repos/codeskyblue/gohttpserver/releases/latest -s | grep "tag_name"| awk '{print substr($2, 2, length($2)-3) }')
 
@@ -320,9 +343,9 @@ function setuphttp () {
     # Make gohttp log folders
     if [ ! -d "/var/log/gohttp" ]; then
         echo "Creating /var/log/gohttp"
-        sudo mkdir -p /var/log/gohttp/
+        $SUDO mkdir -p /var/log/gohttp/
     fi
-    sudo chown "${uname}" -R /var/log/gohttp/
+    $SUDO chown "${uname}" -R /var/log/gohttp/
 
     echo "Tidying up Go HTTP Server Install"
     if [ "${ARCH}" = "x86_64" ] ; then
@@ -352,10 +375,10 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 )"
-    echo "${gohttpserver}" | sudo tee /etc/systemd/system/gohttpserver.service > /dev/null
-    sudo systemctl daemon-reload
-    sudo systemctl enable gohttpserver.service
-    sudo systemctl start gohttpserver.service
+    echo "${gohttpserver}" | $SUDO tee /etc/systemd/system/gohttpserver.service > /dev/null
+    $SUDO systemctl daemon-reload
+    $SUDO systemctl enable gohttpserver.service
+    $SUDO systemctl start gohttpserver.service
 
 
     echo -e "Your IP/DNS Address is ${wanip}"
@@ -392,7 +415,7 @@ if [[ -z "$http" ]]; then
     echo -e "Your public key is ${key}"
     echo -e "Install Rustdesk on your machines and change your public key and IP/DNS name to the above"
 
-    echo - e "You can get a free API with Addressbook etc via https://github.com/infiniteremote/installer"
+    echo -e "You can get a free API with Addressbook etc via https://github.com/infiniteremote/installer"
 
     echo "Press any key to finish install"
     while [ true ] ; do
